@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QOVOX COM</title>
+    <meta
+      name="description"
+      content="هذا الموقع خاص بطاقم العمل فقط و لا يمكنك ان تكون هنا اله بـ كود دعوة"
+    />
+    <link rel="stylesheet" href="main.css" />
+    <link rel="icon" href="img/hamer.png" type="image/png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Akronim&family=Alkalami&family=Amiri+Quran&family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Architects+Daughter&family=Aref+Ruqaa+Ink:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Badeen+Display&family=Baskervville:ital,wght@0,400..700;1,400..700&family=Bodoni+Moda+SC:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Bytesized&family=Cairo+Play:wght@200..1000&family=Cairo:wght@200..1000&family=Cascadia+Mono:ital,wght@0,200..700;1,200..700&family=Changa:wght@200..800&family=Coral+Pixels&family=Corinthia:wght@400;700&family=Creepster&family=Danfo&family=Edu+AU+VIC+WA+NT+Dots:wght@400..700&family=Fascinate+Inline&family=Fruktur:ital@0;1&family=Fustat:wght@200..800&family=Handjet:wght,ELSH@100..900,2&family=Jersey+25+Charted&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Kavivanar&family=LINE+Seed+JP&family=Lalezar&family=Lateef:wght@200;300;400;500;600;700;800&family=Libertinus+Keyboard&family=Libre+Barcode+39+Extended&family=Mada:wght@200..900&family=Marhey:wght@300..700&family=Mirza:wght@400;500;600;700&family=Moirai+One&family=Nabla&family=Noto+Serif+Khitan+Small+Script&family=Oi&family=Oswald:wght@200..700&family=Palette+Mosaic&family=Playwrite+CU+Guides&family=Playwrite+NZ+Basic+Guides&family=Playwrite+NZ+Basic:wght@100..400&family=Qahiri&family=Rakkas&family=Reem+Kufi+Fun:wght@400..700&family=Reem+Kufi+Ink&family=Reem+Kufi:wght@400..700&family=Roboto:ital,wght@0,100..900;1,100..900&family=Rubik+80s+Fade&family=Rubik+Broken+Fax&family=Rubik+Moonrocks&family=Rubik+Wet+Paint&family=Rubik:ital,wght@0,300..900;1,300..900&family=Ruge+Boogie&family=Ruwudu:wght@400;500;600;700&family=SN+Pro:ital,wght@0,200..900;1,200..900&family=Scheherazade+New:wght@400;500;600;700&family=Stalinist+One&family=Tajawal:wght@200;300;400;500;700;800;900&family=Trade+Winds&family=Train+One&family=Vibes&family=Zilla+Slab+Highlight:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="cursor-glow"></div>
+
+    <header class="top-header">
+      <div class="logo-wrapper">
+        <img src="img/hamer.png" alt="QOVOX Logo" class="vw-logo" />
+        <div class="company-info">
+          <h1 class="site-title">QOVOX</h1>
+          <p class="tagline">نحن المستقبل</p>
+        </div>
+      </div>
+    </header>
+
+    <nav class="navbar">
+      <div class="nav-links">
+        <a href="#" class="nav-item" id="profile" onclick="openProfile(event)">
+          <img src="img/profile-icon.png" alt="Profile" />
+          <span class="nav-label">الملف الشخصي</span>
+        </a>
+        <a href="#" class="nav-item" id="project">
+          <img src="img/folder-icon.png" alt="Project" />
+          <span class="nav-label">المشروع الحالي</span>
+        </a>
+        <a
+          href="#"
+          class="nav-item"
+          id="project-details"
+          onclick="openProjectDetails(event)"
+        >
+          <img src="img/sparkles-icon.png" alt="Details" />
+          <span class="nav-label">تفاصيل المشروع</span>
+        </a>
+        <a href="#" class="nav-item" id="post" onclick="openPosts(event)">
+          <img class="mail" src="img/mail-icon.png" alt="Posts" />
+          <span class="nav-label">المنشورات</span>
+        </a>
+        <a href="#" class="nav-item game" id="game">
+          <img src="img/game.png" alt="Game" />
+          <span class="nav-label">Mini Games</span>
+        </a>
+      </div>
+    </nav>
+
+    <main style="min-height: 100vh">
+      <div id="profileSection" style="display: none">
+        <div class="profile-card">
+          <div class="profile-avatar-wrap">
+            <img
+              id="profileImg"
+              src=""
+              alt="صورة المستخدم"
+              class="profile-avatar"
+            />
+            <div class="profile-avatar-ring"></div>
+          </div>
+          <h2 id="profileName" class="profile-name"></h2>
+          <div class="profile-fields">
+            <div class="pf-row">
+              <span class="pf-label">العمر</span
+              ><span id="profileAge" class="pf-val"></span>
+            </div>
+            <div class="pf-row">
+              <span class="pf-label">كلمة المرور</span
+              ><span id="profilePass" class="pf-val pf-pass"></span>
+            </div>
+            <div class="pf-row">
+              <span class="pf-label">تاريخ الانضمام</span
+              ><span id="profileDate" class="pf-val"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="projectDetailsSection" style="display: none"></div>
+
+      <div id="postsSection" style="display: none">
+        <div class="posts-topbar">
+          <div class="sort-tabs">
+            <button
+              class="sort-btn active"
+              id="sort-newest"
+              onclick="setSort('newest')"
+            >
+              الأحدث
+            </button>
+            <button
+              class="sort-btn"
+              id="sort-oldest"
+              onclick="setSort('oldest')"
+            >
+              الأقدم
+            </button>
+            <button class="sort-btn" id="sort-likes" onclick="setSort('likes')">
+              الأكثر إعجاباً
+            </button>
+          </div>
+          <button class="create-post-btn" onclick="openCreatePost()">
+            ✦ إنشاء منشور
+          </button>
+        </div>
+        <div id="postsFeed" class="posts-feed"></div>
+      </div>
+
+      <div
+        id="createPostModal"
+        class="cpm-overlay"
+        style="display: none"
+        onclick="cpmOut(event)"
+      >
+        <div class="cpm-box">
+          <div class="cpm-header">
+            <span class="cpm-ttl">منشور جديد</span>
+            <button class="cpm-close" onclick="closeCreatePost()">✕</button>
+          </div>
+          <input
+            type="text"
+            id="postTitleInp"
+            class="cpm-title-inp"
+            placeholder="عنوان المنشور..."
+          />
+          <textarea
+            id="postDitInp"
+            class="cpm-dit-inp"
+            placeholder="ما الذي يدور في عقلك؟"
+          ></textarea>
+          <div
+            class="cpm-img-zone"
+            id="cpmImgZone"
+            onclick="document.getElementById('postImgInp').click()"
+          >
+            <span id="cpmImgLabel"> أضف صورة (اختياري)</span>
+            <img
+              id="cpmImgPrev"
+              src=""
+              style="display: none"
+              class="cpm-img-prev"
+            />
+          </div>
+          <input
+            type="file"
+            id="postImgInp"
+            accept="image/*"
+            style="display: none"
+            onchange="previewPostImg(this)"
+          />
+          <div id="postCreateErr" class="cpm-err"></div>
+          <div class="cpm-footer">
+            <button onclick="closeCreatePost()" class="cpm-btn-cancel">
+              إلغاء
+            </button>
+            <button
+              onclick="submitPost()"
+              id="submitPostBtn"
+              class="cpm-btn-submit"
+            >
+              نشر الآن
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="main-footer">
+      <div class="footer-content">
+        <p>© 2026 جميع الحقوق محفوظة لـ <span class="RED-QOVOX">QOVOX</span></p>
+      </div>
+    </footer>
+
+    <div class="members-fab" id="membersFab" onclick="toggleMembersList()">
+      <img src="img/pro.png" alt="" />
+      <span class="fab-label">قائمة الأعضاء</span>
+    </div>
+
+    <div class="members-panel" id="membersPanel">
+      <div class="mp-header">
+        <span class="mp-title">قائمة الأعضاء</span>
+        <div class="mp-online-badge" id="mpOnlineBadge">
+          متصل الآن: <strong id="mpOnlineCount">0</strong>
+        </div>
+        <button class="mp-close" onclick="toggleMembersList()">✕</button>
+      </div>
+      <div class="mp-list" id="mpList"></div>
+    </div>
+    <div
+      class="mp-backdrop"
+      id="mpBackdrop"
+      onclick="toggleMembersList()"
+    ></div>
+
+    <script src="main.js" type="module"></script>
+    <script type="module" src="posts-logic.js"></script>
+  </body>
+</html>

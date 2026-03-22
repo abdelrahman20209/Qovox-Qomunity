@@ -1,0 +1,250 @@
+* {
+  font-family: "cairo play", serif;
+}
+
+:root {
+  --red: #c80606;
+  --red-dim: rgba(200, 6, 6, 0.15);
+  --red-border: rgba(131, 0, 0, 0.7);
+  --dark: #0a0a0a;
+  --card: #111111;
+  --text: #f0f0f0;
+  --muted: #666;
+  --nav-bg: #1a1a1a;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 100px 50px;
+  background-color: var(--dark);
+  background-image:
+    linear-gradient(rgba(200, 6, 6, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200, 6, 6, 0.07) 1px, transparent 1px);
+  background-size: 44px 44px;
+  background-attachment: fixed;
+  min-height: 100vh;
+  overflow-x: hidden;
+  padding-bottom: 70px;
+  color: var(--text);
+  animation: fadeIn 0.6s ease forwards;
+}
+
+#authContainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  font-family: Fascinate Inline;
+}
+#authCard {
+  width: 400px;
+  background: #0f0f0f;
+  border-radius: 14px;
+  padding: 40px;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  animation: cardEnter 1s ease;
+}
+@keyframes cardEnter {
+  0% {
+    opacity: 0;
+    transform: translateX(-60px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+#authTabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+#authTabs button {
+  flex: 1;
+  height: 42px;
+  border: none;
+  background: #1a1a1a;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #aaa;
+  transition: 0.3s;
+}
+#authTabs button:hover {
+  background: #262626;
+  color: white;
+}
+#authTabs button.active {
+  background: #db0505;
+  color: white;
+  box-shadow: 0 0 10px #9e1a03;
+}
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  animation: fade 0.4s;
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+#signupForm {
+  display: none;
+}
+input {
+  height: 45px;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  padding: 0 12px;
+  font-size: 14px;
+  outline: none;
+  background: #151515;
+  color: white;
+  transition: 0.25s;
+}
+input::placeholder {
+  color: #777;
+}
+input:focus {
+  border-color: #dd0808;
+  box-shadow: 0 0 8px rgba(172, 3, 3, 0.6);
+}
+button[type="submit"] {
+  height: 45px;
+  border: none;
+  border-radius: 6px;
+  background: #d60303;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s;
+}
+button[type="submit"]:hover {
+  background: #dd0707;
+  transform: scale(1.04);
+  box-shadow: 0 0 12px rgba(139, 2, 2, 0.7);
+}
+button[type="submit"]:active {
+  transform: scale(0.96);
+}
+#authMessage {
+  margin-top: 15px;
+  font-size: 14px;
+  text-align: center;
+  color: #aaa;
+}
+#heroText {
+  position: absolute;
+  left: 8%;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40%;
+  color: white;
+  line-height: 1.6;
+  font-family: "Cairo", sans-serif;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+#changingText {
+  display: inline-block;
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.6s ease;
+}
+.textHide {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.textShow {
+  opacity: 1;
+  transform: translateY(0);
+}
+.whitePart {
+  color: white;
+}
+.redPart {
+  color: #ff2b2b;
+}
+.textFadeOut {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: 0.5s;
+}
+.textFadeIn {
+  opacity: 1;
+  transform: translateY(0);
+  transition: 0.5s;
+}
+.glitch {
+  position: relative;
+  color: white;
+  animation: glitch 0.4s infinite;
+}
+@keyframes glitch {
+  0% {
+    text-shadow:
+      2px 0 red,
+      -2px 0 blue;
+  }
+  25% {
+    text-shadow:
+      -2px 0 red,
+      2px 0 blue;
+  }
+  50% {
+    text-shadow:
+      2px 2px red,
+      -2px -2px blue;
+  }
+  75% {
+    text-shadow:
+      -2px -2px red,
+      2px 2px blue;
+  }
+  100% {
+    text-shadow:
+      2px 0 red,
+      -2px 0 blue;
+  }
+}
+.error {
+  color: #ff3b3b;
+  font-size: 13px;
+  margin-top: -8px;
+  margin-bottom: 8px;
+  min-height: 16px;
+}
+.main-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #1c0000;
+  color: #860707;
+  text-align: center;
+  padding: 12px 0;
+  font-size: 14px;
+  height: 50px;
+}

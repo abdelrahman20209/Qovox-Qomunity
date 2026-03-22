@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<link rel="icon" href="hamer.png" type="image/png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Ball - QOVOX</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #606060, #808080);
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        #gameContainer {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #languageScreen {
+            text-align: center;
+        }
+
+        #mainScreen {
+            text-align: center;
+            position: relative;
+        }
+
+        .title {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 20px rgba(255,255,255,0.8);
+            margin-bottom: 2rem;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(255,255,255,0.8); }
+            to { text-shadow: 0 0 30px rgba(255,255,255,1); }
+        }
+
+        .button {
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            min-width: 200px;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            background: linear-gradient(135deg, #ff6666, #dd1111);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #f0f0f0, #d0d0d0);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 90%;
+            max-height: 80%;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .close-btn:hover {
+            color: #000;
+        }
+
+        #gameScreen {
+            background: linear-gradient(135deg, #606060, #808080);
+            flex-direction: column;
+        }
+
+        #gameCanvas {
+            border: 2px solid #333;
+            display: block;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #606060, #808080);
+        }
+
+        .game-ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #pauseButton {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #4444ff, #0000cc);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        #pauseButton:hover {
+            background: linear-gradient(135deg, #6666ff, #1111dd);
+        }
+
+        #countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4rem;
+            color: white;
+            text-shadow: 0 0 10px rgba(255,255,255,0.8);
+            display: none;
+            z-index: 999;
+        }
+
+        #motivationText {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            color: white;
+            text-shadow: 0 0 10px rgba(255,255,255,0.8);
+            display: none;
+            z-index: 500;
+            pointer-events: none;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        #endScreen {
+            text-align: center;
+            color: white;
+        }
+
+        .score-board {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 20px;
+            margin: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        #version {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+            font-size: 1rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .button {
+                font-size: 1rem;
+                padding: 12px 24px;
+                min-width: 150px;
+            }
+
+            .game-ui {
+                font-size: 1.2rem;
+            }
+
+            #pauseButton {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+
+            #motivationText {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="languageScreen" class="screen active">
+            <h1 class="title">اختر اللغة | Choose Language</h1>
+            <button class="button" onclick="selectLanguage('ar')">عربي</button>
+            <button class="button" onclick="selectLanguage('en')">English</button>
+        </div>
+
+        <div id="mainScreen" class="screen">
+            <h1 class="title">The Ball</h1>
+            <button id="startButton" class="button" onclick="startGame()">ابدء</button>
+            <div id="howToPlayText" style="margin: 10px 0; color: white; font-size: 1rem;">ازاي العب؟</div>
+            <button id="instructionsButton" class="button" onclick="showInstructions()">أأأدخل شووووف</button>
+            <button id="morButton" class="button" onclick="window.open('../game.html', '_self')">ارجع</button>
+            <button id="highScoresButton" class="button" onclick="showHighScores()">افضل النتائج</button>
+            <button id="updatesButton" class="button" onclick="showUpdates()">التحديثات</button>
+            <div id="version">V6.3</div>
+        </div>
+
+        <div id="gameScreen" class="screen">
+            <div class="game-ui">
+                <div>Score: <span id="score">3</span></div>
+                <div>Time: <span id="timer">0</span>s</div>
+            </div>
+            <button id="pauseButton" onclick="pauseGame()">توقف</button>
+            <canvas id="gameCanvas"></canvas>
+            <div id="countdown"></div>
+            <div id="motivationText"></div>
+        </div>
+
+        <div id="endScreen" class="screen">
+            <div class="score-board">
+                <h2 id="gameOverText">انت خسرت يبطل</h2>
+                <p>Final Score: <span id="finalScore">0</span></p>
+                <p>Time Played: <span id="finalTime">0</span>s</p>
+                <button class="button" onclick="goHome()">Main Menu</button>
+                <button class="button" onclick="restartGame()">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="instructionsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeInstructions()">&times;</span>
+            <h3 id="instructionsTitle">كيفية اللعب</h3>
+            <p id="instructionsText">طريقة اللعبة سهلة جداً، أنت كرة، أي مربع تشوفه ابعد عنه عشان هيقلل من سكورك، وأي كرة خضراء خدها هتزود سكورك، بس لو سكورك وصل صفر هتخسر.</p>
+        </div>
+    </div>
+
+    <div id="highScoresModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeHighScores()">&times;</span>
+            <h3 id="highScoresTitle">أفضل النتائج</h3>
+            <ul id="highScoresList"></ul>
+        </div>
+    </div>
+
+    <div id="pauseModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="resumeGame()">&times;</span>
+            <h3 id="pauseTitle">اللعبة متوقفة</h3>
+            <button id="resumeButton" class="button" onclick="resumeGame()">استمر</button>
+        </div>
+    </div>
+
+    <div id="updatesModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeUpdates()">&times;</span>
+            <p>تحديثات:
+ملكش دعوة
+Updates:
+ملكش دعوة بلنجليزي</p>
+        </div>
+    </div>
+
+    <script>
+        var selectedLanguage = 'ar';
+        var currentScreen = 'language';
+        var gameState = {
+            score: 3,
+            time: 0,
+            gameRunning: false,
+            player: { x: 0, y: 0, radius: 18 },
+            enemies: [],
+            powerups: [],
+            gameSpeed: 1,
+            lastMotivation: '',
+            motivationTimer: null
+        };
+
+        var canvas, ctx;
+        var gameTimer;
+        var spawnTimer;
+        var highScores = JSON.parse(localStorage.getItem('highScores')) || [];
+
+        const translations = {
+            ar: {
+                startButton: 'ابدء',
+                howToPlayText: 'ازاي العب؟',
+                instructionsButton: 'أأأدخل شووووف',
+                morButton: 'ارجع',
+                highScoresButton: 'افضل النتائج',
+                updatesButton: 'التحديثات',
+                instructionsTitle: 'كيفية اللعب',
+                instructionsText: 'طريقة اللعبة سهلة جداً، أنت كرة، أي مربع تشوفه ابعد عنه عشان هيقلل من سكورك، وأي كرة خضراء خدها هتزود سكورك، بس لو سكورك وصل صفر هتخسر.',
+                highScoresTitle: 'أفضل النتائج',
+                pauseButton: 'توقف',
+                pauseTitle: 'اللعبة متوقفة',
+                resumeButton: 'استمر',
+                gameOverText: 'انت خسرت يبطل',
+                highScorePrefix: 'المركز '
+            },
+            en: {
+                startButton: 'Start',
+                howToPlayText: 'How to play',
+                instructionsButton: 'Take a look',
+                morButton: 'Return',
+                highScoresButton: 'Best results',
+                updatesButton: 'Updates',
+                instructionsTitle: 'How to play',
+                instructionsText: 'The gameplay is very easy. You are a ball, move away from any square you see because it will lower your score. Any green ball you take will increase your score, but if your score reaches zero you will lose.',
+                highScoresTitle: 'Best Results',
+                pauseButton: 'To stop',
+                pauseTitle: 'The game is stopped',
+                resumeButton: 'Continuation',
+                gameOverText: 'You lost..try again',
+                highScorePrefix: ''
+            }
+        };
+
+        const motivations = [
+            'عاش',
+            'استمر',
+            'جاامد',
+            'انت الفاجر',
+            'انت مفيش منك',
+            'عاش الرجاله عااش',
+            'انت مهكر اللعبه بقا',
+            'مش ممكن',
+            'انت المطروش'
+        ];
+
+        function selectLanguage(lang) {
+            selectedLanguage = lang;
+            updateUIText();
+            showScreen('main');
+        }
+
+        function updateUIText() {
+            const t = translations[selectedLanguage];
+            document.getElementById('startButton').textContent = t.startButton;
+            document.getElementById('howToPlayText').textContent = t.howToPlayText;
+            document.getElementById('instructionsButton').textContent = t.instructionsButton;
+            document.getElementById('morButton').textContent = t.morButton;
+            document.getElementById('highScoresButton').textContent = t.highScoresButton;
+            document.getElementById('updatesButton').textContent = t.updatesButton;
+            document.getElementById('instructionsTitle').textContent = t.instructionsTitle;
+            document.getElementById('instructionsText').textContent = t.instructionsText;
+            document.getElementById('highScoresTitle').textContent = t.highScoresTitle;
+            document.getElementById('pauseButton').textContent = t.pauseButton;
+            document.getElementById('pauseTitle').textContent = t.pauseTitle;
+            document.getElementById('resumeButton').textContent = t.resumeButton;
+            document.getElementById('gameOverText').textContent = t.gameOverText;
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId + 'Screen').classList.add('active');
+            currentScreen = screenId;
+        }
+
+        function showInstructions() {
+            document.getElementById('instructionsModal').style.display = 'flex';
+        }
+
+        function closeInstructions() {
+            document.getElementById('instructionsModal').style.display = 'none';
+        }
+
+        function showHighScores() {
+            const modal = document.getElementById('highScoresModal');
+            const list = document.getElementById('highScoresList');
+            list.innerHTML = '';
+            highScores.forEach((score, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${translations[selectedLanguage].highScorePrefix}${index + 1}: ${score} s`;
+                list.appendChild(li);
+            });
+            modal.style.display = 'flex';
+            document.body.style.pointerEvents = 'none';
+            modal.style.pointerEvents = 'auto';
+        }
+
+        function closeHighScores() {
+            document.getElementById('highScoresModal').style.display = 'none';
+            document.body.style.pointerEvents = 'auto';
+        }
+
+        function showUpdates() {
+            document.getElementById('updatesModal').style.display = 'flex';
+            document.body.style.pointerEvents = 'none';
+            document.getElementById('updatesModal').style.pointerEvents = 'auto';
+        }
+
+        function closeUpdates() {
+            document.getElementById('updatesModal').style.display = 'none';
+            document.body.style.pointerEvents = 'auto';
+        }
+
+        function startGame() {
+            showScreen('game');
+            initGame();
+        }
+
+        function goHome() {
+            showScreen('main');
+            resetGame();
+        }
+
+        function restartGame() {
+            resetGame();
+            startGame();
+        }
+
+        function resetGame() {
+            gameState.score = 3;
+            gameState.time = 0;
+            gameState.gameRunning = false;
+            gameState.player = { x: 0, y: 0, radius: 18 };
+            gameState.enemies = [];
+            gameState.powerups = [];
+            gameState.gameSpeed = 1;
+            gameState.lastMotivation = '';
+            clearInterval(gameTimer);
+            clearInterval(spawnTimer);
+            clearTimeout(gameState.motivationTimer);
+        }
+
+        function initGame() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            gameState.player.x = canvas.width / 2;
+            gameState.player.y = canvas.height - 100;
+            gameState.gameRunning = true;
+            
+            gameTimer = setInterval(() => {
+                if (gameState.gameRunning) {
+                    gameState.time++;
+                    document.getElementById('timer').textContent = gameState.time;
+                    if (selectedLanguage === 'ar' && gameState.time % 50 === 0) {
+                        showMotivation();
+                    }
+                }
+            }, 1000);
+
+            spawnTimer = setInterval(spawnObjects, 500);
+            
+            setupControls();
+            gameLoop();
+        }
+
+        function resizeCanvas() {
+            const container = document.getElementById('gameContainer');
+            const maxWidth = Math.min(400, window.innerWidth - 40);
+            const maxHeight = Math.min(600, window.innerHeight - 100);
+            
+            canvas.width = maxWidth;
+            canvas.height = maxHeight;
+            
+            if (gameState.player.x === 0) {
+                gameState.player.x = canvas.width / 2;
+                gameState.player.y = canvas.height - 100;
+            }
+        }
+
+        function setupControls() {
+            var isDragging = false;
+            var touchStartX = 0;
+
+            canvas.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                updatePlayerPosition(e.clientX);
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    updatePlayerPosition(e.clientX);
+                }
+            });
+
+            canvas.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isDragging = true;
+                touchStartX = e.touches[0].clientX;
+                updatePlayerPosition(e.touches[0].clientX);
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (isDragging) {
+                    updatePlayerPosition(e.touches[0].clientX);
+                }
+            });
+
+            canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                isDragging = false;
+            });
+
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft' && gameState.player.x > gameState.player.radius) {
+                    gameState.player.x -= 20;
+                }
+                if (e.key === 'ArrowRight' && gameState.player.x < canvas.width - gameState.player.radius) {
+                    gameState.player.x += 20;
+                }
+            });
+        }
+
+        function updatePlayerPosition(clientX) {
+            const rect = canvas.getBoundingClientRect();
+            const x = clientX - rect.left;
+            
+            gameState.player.x = Math.max(gameState.player.radius, 
+                Math.min(canvas.width - gameState.player.radius, x));
+        }
+
+        function spawnObjects() {
+            if (!gameState.gameRunning) return;
+            
+            const level = Math.min(Math.floor(gameState.time / 30), 3);
+            const enemySpeedMultiplier = 1 + level * 0.5;
+            const powerupSpeedMultiplier = 1 + level * 0.3;
+            const spawnChance = Math.min(0.85, 0.5 + level * 0.1);
+
+            if (Math.random() < spawnChance) {
+                var sizes = [12, 22, 32, 40];
+                var selectedSize = sizes[Math.floor(Math.random() * sizes.length)];
+                var baseSpeed = 2 + (gameState.time / 20);
+                
+                gameState.enemies.push({
+                    x: Math.random() * (canvas.width - selectedSize) + selectedSize/2,
+                    moveX: (Math.random() - 0.5) * 2,
+                    y: -selectedSize/2,
+                    size: selectedSize,
+                    speed: (Math.random() * 3 + baseSpeed) * enemySpeedMultiplier
+                });
+            }
+            
+            if (Math.random() < Math.max(0.2, 0.4 - (gameState.time / 200))) {
+                gameState.powerups.push({
+                    x: Math.random() * (canvas.width - 20) + 10,
+                    y: -10,
+                    radius: 10,
+                    speed: (Math.random() * 2 + 1 + (gameState.time / 50)) * powerupSpeedMultiplier,
+                    glow: 0
+                });
+            }
+            
+            if (gameState.time > 0 && gameState.time % 15 === 0) {
+                for(var i = 0; i < 3; i++) {
+                    var size = 15 + Math.random() * 20;
+                    setTimeout(function() {
+                        if (gameState.gameRunning) {
+                            gameState.enemies.push({
+                                x: Math.random() * (canvas.width - size) + size/2,
+                                moveX: (Math.random() - 0.5) * 2,
+                                y: -size/2,
+                                size: size,
+                                speed: (4 + Math.random() * 4) * enemySpeedMultiplier
+                            });
+                        }
+                    }, i * 200);
+                }
+            }
+        }
+
+        function gameLoop() {
+            if (!gameState.gameRunning) return;
+            
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function update() {
+            gameState.enemies.forEach((enemy, index) => {
+                enemy.y += enemy.speed;
+                enemy.x += enemy.moveX;
+                
+                if (enemy.y > canvas.height + 50) {
+                    gameState.enemies.splice(index, 1);
+                    return;
+                }
+                
+                const dist = Math.sqrt(
+                    Math.pow(gameState.player.x - enemy.x, 2) + 
+                    Math.pow(gameState.player.y - enemy.y, 2)
+                );
+                
+                if (dist < gameState.player.radius + enemy.size / 2) {
+                    gameState.enemies.splice(index, 1);
+                    gameState.score--;
+                    document.getElementById('score').textContent = gameState.score;
+                    
+                    if (gameState.score <= 0) {
+                        endGame();
+                    }
+                }
+            });
+            
+            gameState.powerups.forEach((powerup, index) => {
+                powerup.y += powerup.speed;
+                powerup.glow += 0.1;
+                
+                if (powerup.y > canvas.height + 50) {
+                    gameState.powerups.splice(index, 1);
+                    return;
+                }
+                
+                const dist = Math.sqrt(
+                    Math.pow(gameState.player.x - powerup.x, 2) + 
+                    Math.pow(gameState.player.y - powerup.y, 2)
+                );
+                
+                if (dist < gameState.player.radius + powerup.radius) {
+                    gameState.powerups.splice(index, 1);
+                    gameState.score++;
+                    document.getElementById('score').textContent = gameState.score;
+                }
+            });
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = 'white';
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(gameState.player.x, gameState.player.y, gameState.player.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            ctx.fillStyle = '#ff4444';
+            gameState.enemies.forEach(enemy => {
+                ctx.fillRect(enemy.x - enemy.size/2, enemy.y - enemy.size/2, enemy.size, enemy.size);
+            });
+            
+            ctx.fillStyle = '#44ff44';
+            gameState.powerups.forEach(powerup => {
+                ctx.shadowBlur = 10 + Math.sin(powerup.glow) * 5;
+                ctx.shadowColor = '#44ff44';
+                ctx.beginPath();
+                ctx.arc(powerup.x, powerup.y, powerup.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+        }
+
+        function endGame() {
+            gameState.gameRunning = false;
+            clearInterval(gameTimer);
+            clearInterval(spawnTimer);
+            clearTimeout(gameState.motivationTimer);
+            
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('finalTime').textContent = gameState.time;
+            
+            saveHighScore(gameState.time);
+            
+            showScreen('end');
+        }
+
+        function saveHighScore(time) {
+            highScores.push(time);
+            highScores.sort((a, b) => b - a);
+            highScores = highScores.slice(0, 5);
+            localStorage.setItem('highScores', JSON.stringify(highScores));
+        }
+
+        function pauseGame() {
+            gameState.gameRunning = false;
+            document.getElementById('pauseModal').style.display = 'flex';
+        }
+
+        function resumeGame() {
+            document.getElementById('pauseModal').style.display = 'none';
+            startCountdown();
+        }
+
+        function startCountdown() {
+            const countdownEl = document.getElementById('countdown');
+            countdownEl.style.display = 'block';
+            let count = 3;
+            countdownEl.textContent = count;
+            const interval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownEl.textContent = count;
+                } else {
+                    clearInterval(interval);
+                    countdownEl.style.display = 'none';
+                    gameState.gameRunning = true;
+                    gameLoop();
+                }
+            }, 1000);
+        }
+
+        function showMotivation() {
+            const motivationEl = document.getElementById('motivationText');
+            let newMotivation = motivations[Math.floor(Math.random() * motivations.length)];
+            while (newMotivation === gameState.lastMotivation) {
+                newMotivation = motivations[Math.floor(Math.random() * motivations.length)];
+            }
+            gameState.lastMotivation = newMotivation;
+            motivationEl.textContent = newMotivation;
+            motivationEl.style.display = 'block';
+            const canvasRect = canvas.getBoundingClientRect();
+            motivationEl.style.top = `${canvasRect.top + 10}px`;
+            motivationEl.style.right = `${window.innerWidth - canvasRect.right + 10}px`;
+            gameState.motivationTimer = setTimeout(() => {
+                motivationEl.style.display = 'none';
+            }, 3000);
+        }
+
+        window.addEventListener('resize', () => {
+            if (canvas) {
+                resizeCanvas();
+            }
+        });
+    </script>
+</body>
+</html>

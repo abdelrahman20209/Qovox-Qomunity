@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Programmers war — QOVOX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" href="hamer.png" type="image/png">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000814;font-family:'Cairo',sans-serif}
+canvas{display:block;position:fixed;inset:0;touch-action:none}
+#back{position:fixed;top:18px;left:18px;z-index:200;display:flex;align-items:center;gap:8px;background:rgba(0,20,60,0.55);border:1px solid rgba(0,150,255,0.28);padding:8px 17px;border-radius:40px;text-decoration:none;color:rgba(255,255,255,0.55);font-size:13px;font-weight:600;letter-spacing:1px;transition:.3s;backdrop-filter:blur(8px)}
+#back:hover{background:rgba(0,80,180,0.5);border-color:rgba(0,180,255,0.65);color:#fff;box-shadow:0 0 20px rgba(0,140,255,0.35)}
+#hud{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 24px 14px 110px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(0,8,20,0.92),transparent);pointer-events:none}
+#hud-left{display:flex;align-items:center;gap:20px}
+.hud-block{display:flex;flex-direction:column;gap:1px}
+.hud-label{font-size:9px;letter-spacing:3.5px;color:rgba(0,180,255,0.45);font-family:'Oswald',sans-serif}
+.hud-val{font-family:'Oswald',sans-serif;font-size:30px;font-weight:700;color:#fff;line-height:1;text-shadow:0 0 14px rgba(0,180,255,0.6)}
+#score-val.bump{animation:bump .16s ease}
+@keyframes bump{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+#hp-bar-wrap{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+#hp-bar{width:140px;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;border:1px solid rgba(0,180,255,0.18)}
+#hp-fill{height:100%;width:100%;background:linear-gradient(90deg,#00aaff,#00ffcc);border-radius:3px;transition:width .25s,background .3s}
+#wave-tag{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:4px;color:rgba(0,180,255,0.4)}
+#overlay{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,8,20,0.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);transition:opacity .45s,visibility .45s}
+#overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.o-tag{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:5px;color:rgba(0,180,255,0.4);margin-bottom:12px}
+.o-title{font-family:'Oswald',sans-serif;font-size:clamp(60px,13vw,110px);font-weight:700;color:#fff;letter-spacing:3px;line-height:.88;text-align:center;text-shadow:0 0 60px rgba(0,100,255,0.3)}
+.o-title .b{color:#00aaff;text-shadow:0 0 40px #00aaff,0 0 80px #003388}
+.o-sub{font-size:15px;color:rgba(255,255,255,0.35);text-align:center;line-height:1.85;max-width:300px;margin:16px 0 36px}
+.death-box{display:none;flex-direction:column;align-items:center;padding:18px 52px;border:1px solid rgba(0,150,255,0.28);border-radius:6px;background:rgba(0,20,60,0.35);margin-bottom:28px;gap:3px}
+.death-box.show{display:flex}
+.db-label{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:4px;color:rgba(0,180,255,0.35)}
+.db-num{font-family:'Oswald',sans-serif;font-size:72px;font-weight:700;color:#00aaff;line-height:1;text-shadow:0 0 28px #00aaff}
+.db-sub{font-family:'Cairo',sans-serif;font-size:12px;color:rgba(255,255,255,0.25);letter-spacing:1px}
+.play-btn{position:relative;padding:14px 56px;border:1px solid #00aaff;border-radius:3px;background:transparent;color:#fff;font-family:'Cairo',sans-serif;font-size:17px;font-weight:700;letter-spacing:3px;cursor:pointer;overflow:hidden;transition:box-shadow .3s,border-color .3s}
+.play-btn::before{content:'';position:absolute;inset:0;background:rgba(0,80,180,0.55);transform:scaleX(0);transform-origin:right;transition:transform .38s cubic-bezier(.4,0,.2,1);z-index:0}
+.play-btn:hover::before{transform:scaleX(1);transform-origin:left}
+.play-btn:hover{box-shadow:0 0 36px rgba(0,140,255,0.5);border-color:#00ddff}
+.play-btn span{position:relative;z-index:1}
+.hint{margin-top:16px;font-size:11px;color:rgba(255,255,255,0.15);letter-spacing:1.5px}
+.back-overlay{display:inline-block;margin-top:14px;text-decoration:none;color:rgba(255,255,255,0.28);font-family:'Cairo',sans-serif;font-size:13px;letter-spacing:1.5px;transition:color .3s}
+.back-overlay:hover{color:rgba(0,180,255,0.8)}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<a href="../game.html" id="back">أرجع</a>
+<div id="hud">
+    <div id="hud-left">
+        <div class="hud-block">
+            <span class="hud-label">SCORE</span>
+            <span class="hud-val" id="score-val">0</span>
+        </div>
+        <div class="hud-block">
+            <span class="hud-label">KILLS</span>
+            <span class="hud-val" id="kills-val">0</span>
+        </div>
+    </div>
+    <div id="hp-bar-wrap">
+        <span id="wave-tag">WAVE 1</span>
+        <div id="hp-bar"><div id="hp-fill"></div></div>
+    </div>
+</div>
+<div id="overlay">
+    <div class="o-tag">QOVOX</div>
+    <div class="o-title">Programmers<br><span class="b">war</span></div>
+    <div class="o-sub" id="o-sub">تحكم في طيارتك وابادة كل الاعداء<br>الطلق بيطلع لوحدو</div>
+    <div class="death-box" id="death-box">
+        <span class="db-label">SCORE</span>
+        <span class="db-num" id="db-num">0</span>
+        <span class="db-sub" id="db-sub">قتلت 0 عدو</span>
+    </div>
+    <button class="play-btn" id="play-btn"><span id="btn-label">ابدأ القتال</span></button>
+    <a href="../game.html" class="back-overlay">أرجع</a>
+    <div class="hint">حرك الماوس أو إصبعك للتحكم</div>
+</div>
+<script>
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+
+const scoreEl  = document.getElementById('score-val');
+const killsEl  = document.getElementById('kills-val');
+const waveEl   = document.getElementById('wave-tag');
+const hpFill   = document.getElementById('hp-fill');
+const overlay  = document.getElementById('overlay');
+const playBtn  = document.getElementById('play-btn');
+const deathBox = document.getElementById('death-box');
+const dbNum    = document.getElementById('db-num');
+const dbSub    = document.getElementById('db-sub');
+const oSubEl   = document.getElementById('o-sub');
+const btnLabel = document.getElementById('btn-label');
+
+let W, H, rafId;
+let mx = 0, my = 0;
+let player, bullets, enemies, particles, stars;
+let score, kills, wave, hp;
+let lastShot, lastSpawn, spawnTimer, waveTimer;
+let gameActive = false;
+let scroll = 0;
+
+const PLAYER_IMG = new Image();
+
+let playerImgOk  = false;
+
+PLAYER_IMG.onload = () => { playerImgOk = true; };
+
+PLAYER_IMG.src    = 'player.png';
+const enemyImages = [];
+
+const imageNames = [
+"atk.png",
+"cpls.png",
+"csharb.png",
+"ere.PNG",
+"ht.png",
+"java.png",
+"json.png",
+"nodejs.png",
+"php.png",
+"python.png",
+"ss.png",
+"swift.png",
+"vs.png",
+"hamer.png"
+];
+
+imageNames.forEach(name => {
+    const img = new Image();
+    img.src = name;
+    enemyImages.push(img);
+});
+
+function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    mx = W / 2;
+    my = H - 120;
+}
+window.addEventListener('resize', resize);
+
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+canvas.addEventListener('touchmove',  e => { e.preventDefault(); mx = e.touches[0].clientX; my = e.touches[0].clientY; }, { passive: false });
+canvas.addEventListener('touchstart', e => { e.preventDefault(); mx = e.touches[0].clientX; my = e.touches[0].clientY; }, { passive: false });
+
+function makeStars() {
+    stars = [];
+    for (let i = 0; i < 200; i++) {
+        stars.push({
+            x:   Math.random() * 4000,
+            y:   Math.random() * 4000,
+            r:   Math.random() * 1.5 + 0.3,
+            spd: 0.5 + Math.random() * 2.8,
+            a:   0.2 + Math.random() * 0.8
+        });
+    }
+}
+
+function drawBg() {
+    ctx.save();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = '#000814';
+    ctx.fillRect(0, 0, W, H);
+
+    const ng = ctx.createRadialGradient(W * 0.5, H * 0.3, 0, W * 0.5, H * 0.3, Math.max(W, H) * 0.7);
+    ng.addColorStop(0, 'rgba(0,25,70,0.4)');
+    ng.addColorStop(1, 'transparent');
+    ctx.fillStyle = ng;
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+
+    for (const s of stars) {
+        const sy = ((s.y + scroll * s.spd) % (H + 60)) - 30;
+        const sx = s.x % W;
+        ctx.save();
+        ctx.globalAlpha = s.a;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+class Player {
+    constructor() {
+        this.x     = W / 2;
+        this.y     = H - 120;
+        this.hw    = 32;
+        this.hh    = 32;
+        this.tilt  = 0;
+        this.phase = 0;
+    }
+
+    update() {
+        this.tilt  += ((mx - this.x) * 0.011 - this.tilt) * 0.14;
+        this.tilt   = Math.max(-0.4, Math.min(0.4, this.tilt));
+        this.x     += (mx - this.x) * 0.11;
+        this.x      = Math.max(this.hw + 10, Math.min(W - this.hw - 10, this.x));
+        this.phase += 0.2;
+    }
+
+    draw() {
+        const thrLen = 24 + Math.sin(this.phase) * 9;
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        const tg = ctx.createLinearGradient(0, 20, 0, 20 + thrLen);
+        tg.addColorStop(0,   'rgba(0,200,255,0.9)');
+        tg.addColorStop(0.5, 'rgba(0,100,255,0.5)');
+        tg.addColorStop(1,   'rgba(0,30,180,0)');
+        ctx.fillStyle = tg;
+
+        ctx.beginPath();
+        ctx.ellipse(-9, 22 + thrLen * 0.4, 5, Math.max(1, thrLen * 0.5), 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.ellipse(9, 22 + thrLen * 0.4, 5, Math.max(1, thrLen * 0.5), 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.rotate(this.tilt);
+        if (playerImgOk) {
+            ctx.drawImage(PLAYER_IMG, -this.hw, -this.hh, this.hw * 2, this.hh * 2);
+        } else {
+            ctx.fillStyle = '#00aaff';
+            ctx.beginPath();
+            ctx.moveTo(0, -28);
+            ctx.lineTo(-16,  20);
+            ctx.lineTo(-7,   12);
+            ctx.lineTo(0,    16);
+            ctx.lineTo(7,    12);
+            ctx.lineTo(16,   20);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#aaeeff';
+            ctx.beginPath();
+            ctx.ellipse(0, -4, 5, 9, 0, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        ctx.restore();
+    }
+
+    hitbox() { return { x: this.x - 14, y: this.y - 22, w: 28, h: 44 }; }
+}
+
+class Bullet {
+    constructor(x, y, vx, vy, isPlayer) {
+        this.x        = x;
+        this.y        = y;
+        this.vx       = vx;
+        this.vy       = vy;
+        this.isPlayer = isPlayer;
+        this.trail    = [];
+    }
+
+    update() {
+        this.trail.unshift({ x: this.x, y: this.y });
+        if (this.trail.length > 7) this.trail.pop();
+        this.x += this.vx;
+        this.y += this.vy;
+    }
+
+    draw() {
+        const color = this.isPlayer ? '#00ddff' : '#ff5500';
+        const cr    = this.isPlayer ? 3   : 3.5;
+        const gr    = this.isPlayer ? 8   : 10;
+
+        for (let i = 0; i < this.trail.length; i++) {
+            ctx.save();
+            ctx.globalAlpha = (1 - i / this.trail.length) * 0.45;
+            ctx.fillStyle   = color;
+            ctx.beginPath();
+            ctx.arc(this.trail[i].x, this.trail[i].y, cr, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        ctx.save();
+        const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, gr);
+        g.addColorStop(0, this.isPlayer ? 'rgba(0,220,255,0.85)' : 'rgba(255,80,0,0.85)');
+        g.addColorStop(1, 'transparent');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, gr, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, cr - 0.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    offscreen() { return this.y < -40 || this.y > H + 40 || this.x < -40 || this.x > W + 40; }
+    hitbox() {
+        const r = this.isPlayer ? 5 : 6;
+        return { x: this.x - r, y: this.y - r, w: r * 2, h: r * 2 };
+    }
+}
+
+class Enemy {
+    constructor(waveNum) {
+	this.img = enemyImages[Math.floor(Math.random() * enemyImages.length)];
+        this.w     = 58;
+        this.h     = 58;
+        this.hw    = this.w / 2;
+        this.x     = this.hw + 10 + Math.random() * (W - this.w - 20);
+        this.y     = -this.h;
+        const spd  = 1.3 + Math.random() * 1.8 + waveNum * 0.12;
+        this.vx    = (Math.random() - 0.5) * 1.5;
+        this.vy    = spd;
+        this.maxHp = 1 + Math.floor(waveNum * 0.2);
+        this.hp    = this.maxHp;
+        this.flash = 0;
+        this.phase = Math.random() * Math.PI * 2;
+        this.drift = (Math.random() - 0.5) * 0.6;
+        this.pts   = 10 + waveNum * 2;
+        this.lastShot   = -9999;
+        this.shootDelay = 1600 + Math.random() * 2200;
+    }
+
+    update(ts) {
+        this.phase += 0.022;
+        this.x     += this.vx + Math.sin(this.phase) * this.drift;
+        this.y     += this.vy;
+        if (this.x < this.hw + 5)     { this.x = this.hw + 5;     this.vx =  Math.abs(this.vx); }
+        if (this.x > W - this.hw - 5) { this.x = W - this.hw - 5; this.vx = -Math.abs(this.vx); }
+        if (this.flash > 0) this.flash = Math.max(0, this.flash - 0.1);
+        if (ts - this.lastShot > this.shootDelay && this.y > 30) {
+            this.lastShot = ts;
+            const dx   = player.x - this.x;
+            const dy   = player.y - this.y;
+            const dist = Math.hypot(dx, dy) || 1;
+            const spd  = 5 + wave * 0.25;
+            bullets.push(new Bullet(this.x, this.y + 26, (dx / dist) * spd, (dy / dist) * spd, false));
+        }
+    }
+
+    draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        if (this.flash > 0) {
+            ctx.globalAlpha = 0.5 + this.flash * 0.5;
+        }
+ctx.drawImage(this.img, -this.hw, -this.h / 2, this.w, this.h);
+        ctx.restore();
+
+        if (this.maxHp > 1) {
+            const bw  = 42, bh = 4;
+            const bx  = this.x - bw / 2;
+            const by  = this.y - this.h / 2 - 10;
+            const pct = this.hp / this.maxHp;
+            ctx.save();
+            ctx.fillStyle = 'rgba(255,255,255,0.07)';
+            ctx.beginPath();
+            ctx.rect(bx, by, bw, bh);
+            ctx.fill();
+            ctx.fillStyle = pct > 0.55 ? '#00dd66' : pct > 0.28 ? '#ffaa00' : '#ff2200';
+            ctx.beginPath();
+            ctx.rect(bx, by, Math.max(0, bw * pct), bh);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    hit() { this.hp--; this.flash = 1; return this.hp <= 0; }
+    hitbox() { return { x: this.x - 20, y: this.y - 20, w: 40, h: 40 }; }
+    offscreen() { return this.y > H + 80; }
+}
+
+class Particle {
+    constructor(x, y, colors, fast) {
+        this.x     = x;
+        this.y     = y;
+        const ang  = Math.random() * Math.PI * 2;
+        const spd  = fast ? 2 + Math.random() * 9 : 1 + Math.random() * 5;
+        this.vx    = Math.cos(ang) * spd;
+        this.vy    = Math.sin(ang) * spd;
+        this.r     = fast ? 2.5 + Math.random() * 5 : 1.5 + Math.random() * 3;
+        this.color = colors[Math.floor(Math.random() * colors.length)];
+        this.life  = 1;
+        this.decay = 0.013 + Math.random() * 0.02;
+    }
+
+    update() {
+        this.x    += this.vx;
+        this.y    += this.vy;
+        this.vx   *= 0.95;
+        this.vy   *= 0.95;
+        this.life -= this.decay;
+    }
+
+    draw() {
+        if (this.life <= 0) return;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.life);
+        ctx.fillStyle   = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, Math.max(0.5, this.r * this.life), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+
+    dead() { return this.life <= 0; }
+}
+
+const BIG_COLORS   = ['#ff6600','#ffaa00','#ff2200','#ffffff','#ffee44'];
+const SMALL_COLORS = ['#00ddff','#aaeeff','#ffffff','#0099ff'];
+
+function explode(x, y, big) {
+    const n   = big ? 75 : 22;
+    const cls = big ? BIG_COLORS : SMALL_COLORS;
+    for (let i = 0; i < n; i++) particles.push(new Particle(x, y, cls, big));
+}
+
+function rectsHit(a, b) {
+    return a.x < b.x + b.w && a.x + a.w > b.x &&
+           a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function updateHP(val) {
+    hp = Math.max(0, val);
+    hpFill.style.width      = hp + '%';
+    hpFill.style.background = hp > 55
+        ? 'linear-gradient(90deg,#00aaff,#00ffcc)'
+        : hp > 28
+        ? 'linear-gradient(90deg,#ffaa00,#ff6600)'
+        : 'linear-gradient(90deg,#ff2200,#ff6600)';
+}
+
+function loop(ts) {
+    rafId = requestAnimationFrame(loop);
+    scroll += 1.4;
+    drawBg();
+
+    const shootInterval = Math.max(85, 280 - wave * 12);
+    if (ts - lastShot > shootInterval) {
+        lastShot = ts;
+        if (wave >= 7) {
+            bullets.push(new Bullet(player.x - 14, player.y - 22, -0.5, -14, true));
+            bullets.push(new Bullet(player.x,       player.y - 22,    0, -14, true));
+            bullets.push(new Bullet(player.x + 14, player.y - 22,  0.5, -14, true));
+        } else if (wave >= 4) {
+            bullets.push(new Bullet(player.x - 13, player.y - 22, -0.4, -14, true));
+            bullets.push(new Bullet(player.x + 13, player.y - 22,  0.4, -14, true));
+        } else {
+            bullets.push(new Bullet(player.x - 10, player.y - 22, 0, -14, true));
+            bullets.push(new Bullet(player.x + 10, player.y - 22, 0, -14, true));
+        }
+    }
+
+    waveTimer++;
+    const waveLen = Math.max(6, 14 - wave * 0.5);
+    if (ts - lastSpawn > spawnTimer) {
+        lastSpawn = ts;
+        const batch = 1 + Math.floor(wave * 0.55);
+        for (let i = 0; i < batch; i++) enemies.push(new Enemy(wave));
+        spawnTimer = Math.max(500, 1750 - wave * 75);
+    }
+    if (waveTimer > 60 * waveLen) {
+        wave++;
+        waveTimer = 0;
+        waveEl.textContent = 'WAVE ' + wave;
+    }
+
+    for (let i = bullets.length - 1; i >= 0; i--) {
+        const b = bullets[i];
+        b.update();
+        if (b.offscreen()) { bullets.splice(i, 1); continue; }
+        b.draw();
+
+        if (b.isPlayer) {
+            let hit = false;
+            for (let j = enemies.length - 1; j >= 0; j--) {
+                if (rectsHit(b.hitbox(), enemies[j].hitbox())) {
+                    const killed = enemies[j].hit();
+                    if (killed) {
+                        explode(enemies[j].x, enemies[j].y, true);
+                        score += enemies[j].pts;
+                        kills++;
+                        scoreEl.textContent = score;
+                        killsEl.textContent = kills;
+                        scoreEl.classList.remove('bump');
+                        void scoreEl.offsetWidth;
+                        scoreEl.classList.add('bump');
+                        enemies.splice(j, 1);
+                    }
+                    hit = true;
+                    break;
+                }
+            }
+            if (hit) { bullets.splice(i, 1); continue; }
+        } else {
+            if (rectsHit(b.hitbox(), player.hitbox())) {
+                explode(b.x, b.y, false);
+                bullets.splice(i, 1);
+                updateHP(hp - 18);
+                if (hp <= 0) { endGame(); return; }
+            }
+        }
+    }
+
+    for (let i = enemies.length - 1; i >= 0; i--) {
+        const e = enemies[i];
+        e.update(ts);
+        if (e.offscreen()) { enemies.splice(i, 1); continue; }
+        e.draw();
+        if (rectsHit(e.hitbox(), player.hitbox())) {
+            explode(player.x, player.y, true);
+            updateHP(0);
+            endGame();
+            return;
+        }
+    }
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+        particles[i].update();
+        particles[i].draw();
+        if (particles[i].dead()) particles.splice(i, 1);
+    }
+
+    player.update();
+    player.draw();
+}
+
+function endGame() {
+    cancelAnimationFrame(rafId);
+    gameActive = false;
+    deathBox.classList.add('show');
+    dbNum.textContent = score;
+    dbSub.textContent = 'قتلت ' + kills + ' طيارة عدو';
+    oSubEl.textContent = score >= 2000 ? 'انت طيار جامد' : score >= 700 ? 'مش بطال، بس تقدر أحسن' : 'ارجع وجرب تاني';
+    btnLabel.textContent = 'العب تاني';
+    setTimeout(() => overlay.classList.remove('hidden'), 380);
+}
+
+function startGame() {
+    cancelAnimationFrame(rafId);
+    mx = W / 2;
+    my = H - 120;
+    player    = new Player();
+    bullets   = [];
+    enemies   = [];
+    particles = [];
+    score     = 0;
+    kills     = 0;
+    wave      = 1;
+    hp        = 100;
+    lastShot   = -999;
+    lastSpawn  = -999;
+    spawnTimer = 900;
+    waveTimer  = 0;
+    scroll     = 0;
+    scoreEl.textContent     = '0';
+    killsEl.textContent     = '0';
+    waveEl.textContent      = 'WAVE 1';
+    hpFill.style.width      = '100%';
+    hpFill.style.background = 'linear-gradient(90deg,#00aaff,#00ffcc)';
+    deathBox.classList.remove('show');
+    gameActive = true;
+    overlay.classList.add('hidden');
+    rafId = requestAnimationFrame(loop);
+}
+
+playBtn.addEventListener('click',    startGame);
+playBtn.addEventListener('touchend', e => { e.preventDefault(); startGame(); });
+
+makeStars();
+resize();
+drawBg();
+</script>
+</body>
+</html>

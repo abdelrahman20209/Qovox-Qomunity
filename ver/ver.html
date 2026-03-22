@@ -1,0 +1,1725 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QOVOX COM</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Cinzel:wght@400;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --blk: #050505;
+        --blk2: #0a0a0a;
+        --blk3: #111;
+        --rd: #8b0000;
+        --rd2: #5a0000;
+        --rd3: #3a0000;
+        --rdl: #e63946;
+        --w: #ffffff;
+        --wd: #cccccc;
+        --wm: #666;
+      }
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "Cairo", sans-serif;
+        background: var(--blk);
+        color: var(--w);
+        min-height: 100vh;
+        overflow-x: hidden;
+        cursor: none;
+      }
+
+      #cur,
+      #curR {
+        position: fixed;
+        pointer-events: none;
+        border-radius: 50%;
+        z-index: 99999;
+        transform: translate(-50%, -50%);
+      }
+      #cur {
+        width: 9px;
+        height: 9px;
+        background: var(--rdl);
+        mix-blend-mode: exclusion;
+        transition: transform 0.1s;
+      }
+      #curR {
+        width: 36px;
+        height: 36px;
+        border: 1.5px solid var(--rdl);
+        mix-blend-mode: exclusion;
+        transition:
+          width 0.2s,
+          height 0.2s;
+      }
+
+      .bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .bg::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse 60% 50% at 10% 10%,
+            rgba(139, 0, 0, 0.14) 0%,
+            transparent 65%
+          ),
+          radial-gradient(
+            ellipse 50% 60% at 90% 90%,
+            rgba(90, 0, 0, 0.09) 0%,
+            transparent 65%
+          );
+      }
+      .grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(139, 0, 0, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(139, 0, 0, 0.03) 1px, transparent 1px);
+        background-size: 52px 52px;
+        animation: gd 20s linear infinite;
+      }
+      @keyframes gd {
+        to {
+          transform: translateY(52px);
+        }
+      }
+      .pt {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0;
+        animation: fp var(--d) var(--dl) infinite ease-in-out;
+      }
+      @keyframes fp {
+        0% {
+          transform: translateY(105vh) translateX(0);
+          opacity: 0;
+        }
+        10% {
+          opacity: 0.5;
+        }
+        90% {
+          opacity: 0.2;
+        }
+        100% {
+          transform: translateY(-5vh) translateX(var(--dr));
+          opacity: 0;
+        }
+      }
+
+      .ls {
+        position: fixed;
+        inset: 0;
+        z-index: 9000;
+        background: var(--blk);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        transition: opacity 0.5s;
+      }
+      .ls.out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .ls-logo {
+        font-family: "Cinzel", serif;
+        font-size: 34px;
+        font-weight: 900;
+        letter-spacing: 5px;
+        background: linear-gradient(135deg, #fff 0%, #bbb 50%, var(--rdl) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .ls-bar {
+        width: 180px;
+        height: 2px;
+        background: rgba(139, 0, 0, 0.2);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .ls-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--rd), var(--rdl));
+        animation: lf 1.4s ease forwards;
+      }
+      @keyframes lf {
+        to {
+          width: 100%;
+        }
+      }
+      .ls-fill {
+        width: 0%;
+      }
+      .ls-txt {
+        font-size: 12px;
+        color: var(--wm);
+        letter-spacing: 2px;
+      }
+
+      .ov {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 8000;
+        background: rgba(0, 0, 0, 0.88);
+        backdrop-filter: blur(10px);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+      }
+      .ov.on {
+        display: flex;
+      }
+      .ov-spin {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 3px solid rgba(139, 0, 0, 0.2);
+        border-top-color: var(--rdl);
+        animation: sp 0.85s linear infinite;
+      }
+      @keyframes sp {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .ov-msg {
+        font-size: 15px;
+        color: var(--wd);
+        letter-spacing: 0.8px;
+        text-align: center;
+      }
+      .ov-sub {
+        font-size: 12px;
+        color: var(--wm);
+        text-align: center;
+      }
+      .ov-prog {
+        width: 240px;
+        height: 3px;
+        background: rgba(139, 0, 0, 0.15);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 4px;
+      }
+      .ov-pbar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--rd), var(--rdl));
+        transition: width 0.4s ease;
+        box-shadow: 0 0 8px var(--rdl);
+      }
+
+      .th {
+        position: fixed;
+        top: 26px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9990;
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+        pointer-events: none;
+        width: 370px;
+        max-width: 94vw;
+      }
+      .t {
+        background: #0d0d0d;
+        border-radius: 12px;
+        padding: 13px 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.65);
+        pointer-events: auto;
+        animation: tin 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+        position: relative;
+        overflow: hidden;
+      }
+      .t::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        border-radius: 3px 0 0 3px;
+      }
+      .t.ok {
+        border: 1px solid rgba(34, 197, 94, 0.18);
+      }
+      .t.ok::before {
+        background: #22c55e;
+      }
+      .t.er {
+        border: 1px solid rgba(230, 57, 70, 0.28);
+      }
+      .t.er::before {
+        background: var(--rdl);
+      }
+      .t.wn {
+        border: 1px solid rgba(245, 158, 11, 0.18);
+      }
+      .t.wn::before {
+        background: #f59e0b;
+      }
+      .t.if {
+        border: 1px solid rgba(96, 165, 250, 0.18);
+      }
+      .t.if::before {
+        background: #60a5fa;
+      }
+      @keyframes tin {
+        from {
+          opacity: 0;
+          transform: translateY(-16px) scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      @keyframes tout {
+        from {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateY(-14px);
+        }
+      }
+      .t-ic {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        flex-shrink: 0;
+      }
+      .t.ok .t-ic {
+        background: rgba(34, 197, 94, 0.12);
+        color: #22c55e;
+      }
+      .t.er .t-ic {
+        background: rgba(230, 57, 70, 0.12);
+        color: var(--rdl);
+      }
+      .t.wn .t-ic {
+        background: rgba(245, 158, 11, 0.12);
+        color: #f59e0b;
+      }
+      .t.if .t-ic {
+        background: rgba(96, 165, 250, 0.12);
+        color: #60a5fa;
+      }
+      .t-bd {
+        flex: 1;
+        min-width: 0;
+      }
+      .t-bd b {
+        display: block;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--w);
+        margin-bottom: 2px;
+      }
+      .t-bd s {
+        font-size: 12px;
+        color: var(--wm);
+        display: block;
+        line-height: 1.5;
+        word-break: break-word;
+      }
+      .t-x {
+        background: none;
+        border: none;
+        color: var(--wm);
+        cursor: pointer;
+        font-size: 15px;
+        padding: 0 2px;
+        flex-shrink: 0;
+        transition: color 0.2s;
+      }
+      .t-x:hover {
+        color: var(--w);
+      }
+
+      .wrap {
+        position: relative;
+        z-index: 1;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 52px 32px 90px;
+        opacity: 0;
+        transition: opacity 0.6s;
+      }
+      .wrap.on {
+        opacity: 1;
+      }
+
+      .hd {
+        text-align: center;
+        margin-bottom: 50px;
+        animation: rd 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      @keyframes rd {
+        from {
+          opacity: 0;
+          transform: translateY(-28px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: rgba(139, 0, 0, 0.11);
+        border: 1px solid rgba(139, 0, 0, 0.32);
+        padding: 5px 15px;
+        border-radius: 100px;
+        font-size: 11px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: var(--rdl);
+        margin-bottom: 18px;
+        font-family: "Cinzel", serif;
+      }
+      .bdot {
+        width: 5px;
+        height: 5px;
+        background: var(--rdl);
+        border-radius: 50%;
+        animation: bp 1.6s infinite;
+      }
+      @keyframes bp {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(230, 57, 70, 0.7);
+        }
+        50% {
+          box-shadow: 0 0 0 5px transparent;
+        }
+      }
+      .hd h1 {
+        font-family: "Cinzel", serif;
+        font-size: 38px;
+        font-weight: 900;
+        letter-spacing: 3px;
+        line-height: 1.15;
+        background: linear-gradient(135deg, #fff 0%, #bbb 45%, var(--rdl) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 12px;
+      }
+      .gl {
+        width: 90px;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--rd),
+          var(--rdl),
+          var(--rd),
+          transparent
+        );
+        margin: 14px auto;
+        animation: ge 1.2s ease both 0.3s;
+      }
+      @keyframes ge {
+        from {
+          width: 0;
+          opacity: 0;
+        }
+        to {
+          width: 90px;
+          opacity: 1;
+        }
+      }
+      .hd p {
+        color: var(--wm);
+        font-size: 14px;
+        line-height: 1.8;
+      }
+
+      .steps {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 46px;
+        animation: fu 0.7s ease both 0.15s;
+      }
+      @keyframes fu {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .sn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 7px;
+      }
+      .sc {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 2px solid rgba(139, 0, 0, 0.22);
+        background: var(--blk3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Cinzel", serif;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--wm);
+        transition: all 0.4s;
+      }
+      .sc.ac {
+        border-color: var(--rdl);
+        color: var(--w);
+        background: rgba(139, 0, 0, 0.16);
+        box-shadow: 0 0 18px rgba(230, 57, 70, 0.22);
+      }
+      .sc.dn {
+        border-color: var(--rd);
+        background: rgba(139, 0, 0, 0.3);
+        color: var(--w);
+      }
+      .sl {
+        font-size: 11px;
+        color: var(--wm);
+        text-align: center;
+        width: 76px;
+        letter-spacing: 0.5px;
+        transition: color 0.3s;
+      }
+      .sl.ac {
+        color: var(--rdl);
+      }
+      .sln {
+        width: 80px;
+        height: 1px;
+        background: rgba(139, 0, 0, 0.18);
+        margin: 0 3px 26px;
+        overflow: hidden;
+      }
+      .slnf {
+        height: 100%;
+        background: linear-gradient(90deg, var(--rd), var(--rdl));
+        width: 0%;
+        transition: width 0.55s ease;
+      }
+
+      .sec {
+        display: none;
+      }
+      .sec.on {
+        display: block;
+        animation: si 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      @keyframes si {
+        from {
+          opacity: 0;
+          transform: translateX(28px) scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0) scale(1);
+        }
+      }
+
+      .sh {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        margin-bottom: 24px;
+      }
+      .snum {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, var(--rd3), var(--rd));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Cinzel", serif;
+        font-weight: 900;
+        font-size: 14px;
+        color: var(--w);
+        box-shadow: 0 4px 13px rgba(139, 0, 0, 0.38);
+      }
+      .sh h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--w);
+        letter-spacing: 0.7px;
+      }
+      .sh p {
+        font-size: 12px;
+        color: var(--wm);
+        margin-top: 2px;
+      }
+
+      .grid2 {
+        display: grid;
+        gap: 16px;
+      }
+      .grid2.c2 {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .uc {
+        position: relative;
+        background: var(--blk2);
+        border: 1px solid rgba(139, 0, 0, 0.16);
+        border-radius: 15px;
+        overflow: hidden;
+        transition:
+          border-color 0.3s,
+          transform 0.3s,
+          box-shadow 0.3s;
+      }
+      .uc::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(139, 0, 0, 0.02) 0%,
+          transparent 55%
+        );
+        pointer-events: none;
+      }
+      .uc:hover {
+        border-color: rgba(230, 57, 70, 0.32);
+        transform: translateY(-2px);
+        box-shadow: 0 7px 28px rgba(139, 0, 0, 0.12);
+      }
+      .uc.dov {
+        border-color: var(--rdl);
+        box-shadow: 0 0 24px rgba(230, 57, 70, 0.18);
+        background: rgba(139, 0, 0, 0.06);
+      }
+      .uc.up {
+        border-color: rgba(34, 197, 94, 0.28);
+      }
+      .uc.er {
+        border-color: rgba(230, 57, 70, 0.45);
+        animation: sk 0.45s ease;
+      }
+      @keyframes sk {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        20% {
+          transform: translateX(-7px);
+        }
+        40% {
+          transform: translateX(7px);
+        }
+        60% {
+          transform: translateX(-4px);
+        }
+        80% {
+          transform: translateX(4px);
+        }
+      }
+
+      .fd {
+        position: absolute;
+        top: 11px;
+        left: 11px;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: rgba(139, 0, 0, 0.28);
+        transition: all 0.3s;
+        z-index: 10;
+      }
+      .uc.up .fd {
+        background: #22c55e;
+        box-shadow: 0 0 7px rgba(34, 197, 94, 0.55);
+      }
+      .uc.er .fd {
+        background: var(--rdl);
+        box-shadow: 0 0 6px rgba(230, 57, 70, 0.55);
+        animation: bl 0.65s infinite;
+      }
+      @keyframes bl {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.2;
+        }
+      }
+
+      .shm {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          transparent 38%,
+          rgba(230, 57, 70, 0.03) 50%,
+          transparent 62%
+        );
+        background-size: 200% 200%;
+        animation: sh 4s linear infinite;
+        pointer-events: none;
+      }
+      @keyframes sh {
+        0% {
+          background-position: 200% 200%;
+        }
+        100% {
+          background-position: -200% -200%;
+        }
+      }
+
+      .ub {
+        padding: 28px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 13px;
+        cursor: pointer;
+        min-height: 185px;
+        justify-content: center;
+      }
+      .ir {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: rgba(139, 0, 0, 0.08);
+        border: 1px solid rgba(139, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.32s;
+      }
+      .uc:hover .ir {
+        background: rgba(139, 0, 0, 0.17);
+        border-color: rgba(230, 57, 70, 0.4);
+        transform: scale(1.07) rotate(-4deg);
+        box-shadow: 0 0 18px rgba(230, 57, 70, 0.15);
+      }
+      .ir svg {
+        width: 24px;
+        height: 24px;
+        fill: none;
+        stroke: var(--rdl);
+        stroke-width: 1.5;
+      }
+      .ut strong {
+        display: block;
+        font-size: 14px;
+        font-weight: 700;
+        color: #f0f0f0;
+        text-align: center;
+        margin-bottom: 5px;
+      }
+      .ut span {
+        font-size: 12px;
+        color: var(--wm);
+        display: block;
+        text-align: center;
+      }
+      .utag {
+        font-size: 11px;
+        color: rgba(200, 50, 50, 0.8);
+        background: rgba(139, 0, 0, 0.09);
+        border: 1px solid rgba(139, 0, 0, 0.16);
+        padding: 3px 11px;
+        border-radius: 100px;
+      }
+
+      .pv {
+        position: absolute;
+        inset: 0;
+        display: none;
+        flex-direction: column;
+        border-radius: 15px;
+        overflow: hidden;
+        background: var(--blk2);
+      }
+      .pv.on {
+        display: flex;
+      }
+      .pi {
+        width: 100%;
+        height: 148px;
+        object-fit: cover;
+        display: block;
+      }
+      .pb {
+        padding: 10px 13px;
+        background: rgba(0, 0, 0, 0.68);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .pname {
+        font-size: 11px;
+        color: var(--wd);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        flex: 1;
+        min-width: 0;
+      }
+      .psz {
+        font-size: 11px;
+        color: var(--wm);
+        flex-shrink: 0;
+      }
+      .prm {
+        width: 23px;
+        height: 23px;
+        background: rgba(139, 0, 0, 0.45);
+        border: none;
+        border-radius: 50%;
+        color: var(--w);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        transition: all 0.2s;
+        flex-shrink: 0;
+      }
+      .prm:hover {
+        background: var(--rdl);
+        transform: rotate(90deg);
+      }
+      .pgw {
+        height: 3px;
+        background: rgba(139, 0, 0, 0.11);
+        display: none;
+      }
+      .pgw.on {
+        display: block;
+      }
+      .pgb {
+        height: 100%;
+        background: linear-gradient(90deg, var(--rd), var(--rdl));
+        width: 0%;
+        transition: width 0.45s ease;
+        box-shadow: 0 0 7px var(--rdl);
+      }
+      input[type="file"] {
+        display: none;
+      }
+
+      .ac-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 20px;
+      }
+      .btn {
+        padding: 12px 28px;
+        border-radius: 11px;
+        border: none;
+        font-family: "Cairo", sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        letter-spacing: 0.4px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .btn::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.07);
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      .btn:hover::after {
+        opacity: 1;
+      }
+      .btn-p {
+        background: linear-gradient(
+          135deg,
+          var(--rd3) 0%,
+          var(--rd) 50%,
+          #c0303b 100%
+        );
+        color: var(--w);
+        box-shadow: 0 6px 20px rgba(139, 0, 0, 0.38);
+        min-width: 148px;
+        justify-content: center;
+      }
+      .btn-p:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 11px 28px rgba(139, 0, 0, 0.52);
+      }
+      .btn-p:active {
+        transform: translateY(0);
+      }
+      .btn-p:disabled {
+        opacity: 0.38;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+        pointer-events: none;
+      }
+      .btn-g {
+        background: transparent;
+        color: var(--wm);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .btn-g:hover {
+        color: var(--w);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .sv {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 68px 28px;
+      }
+      .sv.on {
+        display: flex;
+        animation: si 0.8s ease both;
+      }
+      .sorb {
+        width: 108px;
+        height: 108px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(139, 0, 0, 0.22),
+          rgba(58, 0, 0, 0.07)
+        );
+        border: 2px solid rgba(230, 57, 70, 0.32);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 42px;
+        margin-bottom: 26px;
+        animation: og 2.2s infinite;
+        box-shadow: 0 0 45px rgba(139, 0, 0, 0.22);
+      }
+      @keyframes og {
+        0%,
+        100% {
+          box-shadow: 0 0 32px rgba(139, 0, 0, 0.22);
+        }
+        50% {
+          box-shadow: 0 0 65px rgba(230, 57, 70, 0.42);
+        }
+      }
+      .sv h2 {
+        font-family: "Cinzel", serif;
+        font-size: 28px;
+        font-weight: 900;
+        letter-spacing: 2px;
+        color: var(--w);
+        margin-bottom: 10px;
+      }
+      .sv p {
+        color: var(--wm);
+        font-size: 14px;
+        line-height: 1.8;
+        max-width: 360px;
+      }
+      .sr {
+        display: flex;
+        gap: 13px;
+        margin-top: 32px;
+      }
+      .sc2 {
+        background: var(--blk2);
+        border: 1px solid rgba(139, 0, 0, 0.18);
+        border-radius: 11px;
+        overflow: hidden;
+        width: 115px;
+      }
+      .sc2 img {
+        width: 100%;
+        height: 76px;
+        object-fit: cover;
+        display: block;
+      }
+      .sc2 p {
+        font-size: 11px;
+        color: var(--wm);
+        text-align: center;
+        padding: 7px 4px;
+      }
+      .cd {
+        margin-top: 26px;
+        font-size: 13px;
+        color: var(--wm);
+        letter-spacing: 0.8px;
+      }
+      .cd strong {
+        color: var(--rdl);
+        font-size: 20px;
+        font-weight: 900;
+      }
+
+      .err-panel {
+        display: none;
+        background: rgba(139, 0, 0, 0.08);
+        border: 1px solid rgba(230, 57, 70, 0.25);
+        border-radius: 13px;
+        padding: 22px 24px;
+        margin-top: 20px;
+        text-align: center;
+      }
+      .err-panel.on {
+        display: block;
+        animation: si 0.5s ease both;
+      }
+      .err-panel .eico {
+        font-size: 32px;
+        margin-bottom: 12px;
+      }
+      .err-panel h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--rdl);
+        margin-bottom: 8px;
+      }
+      .err-panel p {
+        font-size: 13px;
+        color: var(--wm);
+        line-height: 1.7;
+        margin-bottom: 16px;
+      }
+      .err-panel .err-detail {
+        font-size: 12px;
+        color: rgba(230, 57, 70, 0.7);
+        background: rgba(139, 0, 0, 0.12);
+        border-radius: 7px;
+        padding: 8px 12px;
+        margin-bottom: 16px;
+        word-break: break-all;
+        text-align: right;
+        direction: rtl;
+        font-family: monospace;
+      }
+      .btn-reload {
+        background: linear-gradient(135deg, var(--rd3), var(--rdl));
+        color: var(--w);
+        border: none;
+        padding: 11px 26px;
+        border-radius: 10px;
+        font-family: "Cairo", sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 5px 18px rgba(139, 0, 0, 0.35);
+      }
+      .btn-reload:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 9px 26px rgba(139, 0, 0, 0.5);
+      }
+    </style>
+    <link rel="icon" href="img/hamer.png" type="image/png" />
+  </head>
+  <body>
+    <div id="cur"></div>
+    <div id="curR"></div>
+
+    <div class="bg">
+      <div class="grid"></div>
+      <div id="pts"></div>
+    </div>
+    <div class="ls" id="ls">
+      <div class="ls-logo">QOVOX</div>
+      <div class="ls-bar"><div class="ls-fill"></div></div>
+      <div class="ls-txt">جاري التحقق من حسابك...</div>
+    </div>
+    <div class="ov" id="ov">
+      <div class="ov-spin"></div>
+      <div class="ov-msg" id="ovm">جاري رفع الصور...</div>
+      <div class="ov-sub" id="ovs">الرجاء الانتظار، لا تغلق الصفحة</div>
+      <div class="ov-prog">
+        <div class="ov-pbar" id="ovpb" style="width: 0%"></div>
+      </div>
+    </div>
+    <div class="th" id="th"></div>
+
+    <div class="wrap" id="wrap">
+      <header class="hd">
+        <div class="badge">
+          <div class="bdot"></div>
+          We are the future
+        </div>
+        <h1>تأكيد هويتك</h1>
+        <div class="gl"></div>
+        <p>
+          ارفع صورتك الشخصية وبطاقة هويتك للانضمام<br />جميع بياناتك آمنة ومشفرة
+          بالكامل
+        </p>
+      </header>
+
+      <div class="steps" id="stps">
+        <div class="sn">
+          <div class="sc ac" id="sc1">١</div>
+          <div class="sl ac" id="sl1">الصورة الشخصية</div>
+        </div>
+        <div class="sln"><div class="slnf" id="ln1"></div></div>
+        <div class="sn">
+          <div class="sc" id="sc2">٢</div>
+          <div class="sl" id="sl2">بطاقة الهوية</div>
+        </div>
+      </div>
+
+      <div class="sec on" id="s1">
+        <div class="sh">
+          <div class="snum">١</div>
+          <div>
+            <h2>صورتك الشخصية</h2>
+            <p>صورة حقيقية لك · حتى 32 ميجابايت</p>
+          </div>
+        </div>
+        <div class="grid2">
+          <div
+            class="uc"
+            id="uc-p"
+            ondragover="dov(event, 'uc-p')"
+            ondragleave="dlv('uc-p')"
+            ondrop="dp(event, 'ip-p', 'uc-p')"
+          >
+            <div class="fd"></div>
+            <div class="shm"></div>
+            <div class="ub" onclick="document.getElementById('ip-p').click()">
+              <div class="ir">
+                <svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                </svg>
+              </div>
+              <div class="ut">
+                <strong>صورتك الشخصية</strong
+                ><span>اسحب وأفلت · أو انقر للاختيار</span>
+              </div>
+              <div class="utag">JPG · PNG · WEBP · حتى 32MB</div>
+            </div>
+            <div class="pv" id="pv-p">
+              <img class="pi" id="pi-p" src="" alt="" />
+              <div class="pb">
+                <span class="pname" id="pn-p"></span
+                ><span class="psz" id="ps-p"></span
+                ><button class="prm" onclick="rm('p')">✕</button>
+              </div>
+            </div>
+            <div class="pgw" id="pgw-p"><div class="pgb" id="pgb-p"></div></div>
+            <input
+              type="file"
+              id="ip-p"
+              accept="image/*"
+              onchange="hf(this, 'p')"
+            />
+          </div>
+        </div>
+        <div class="ac-bar">
+          <div></div>
+          <button class="btn btn-p" onclick="nx()">
+            التالي
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="sec" id="s2">
+        <div class="sh">
+          <div class="snum">٢</div>
+          <div>
+            <h2>بطاقة الرقم القومي</h2>
+            <p>الوجهان بوضوح تام · حتى 32 ميجابايت لكل صورة</p>
+          </div>
+        </div>
+        <div
+          style="
+            font-size: 12px;
+            color: var(--wm);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 15px;
+            padding-bottom: 11px;
+            border-bottom: 1px solid rgba(139, 0, 0, 0.11);
+          "
+        >
+          🪪 ارفع الوجهين — الصور الضبابية مرفوضة
+        </div>
+        <div class="grid2 c2">
+          <div
+            class="uc"
+            id="uc-f"
+            ondragover="dov(event, 'uc-f')"
+            ondragleave="dlv('uc-f')"
+            ondrop="dp(event, 'ip-f', 'uc-f')"
+          >
+            <div class="fd"></div>
+            <div class="shm"></div>
+            <div class="ub" onclick="document.getElementById('ip-f').click()">
+              <div class="ir">
+                <svg viewBox="0 0 24 24">
+                  <rect x="3" y="6" width="18" height="13" rx="2" />
+                  <circle cx="8" cy="11" r="2" />
+                  <path d="M13 10h5M13 14h3" />
+                </svg>
+              </div>
+              <div class="ut">
+                <strong>وجه البطاقة</strong><span>الجانب الذي يحوي الصورة</span>
+              </div>
+              <div class="utag">Front Side</div>
+            </div>
+            <div class="pv" id="pv-f">
+              <img class="pi" id="pi-f" src="" alt="" />
+              <div class="pb">
+                <span class="pname" id="pn-f"></span
+                ><span class="psz" id="ps-f"></span
+                ><button class="prm" onclick="rm('f')">✕</button>
+              </div>
+            </div>
+            <div class="pgw" id="pgw-f"><div class="pgb" id="pgb-f"></div></div>
+            <input
+              type="file"
+              id="ip-f"
+              accept="image/*"
+              onchange="hf(this, 'f')"
+            />
+          </div>
+          <div
+            class="uc"
+            id="uc-b"
+            ondragover="dov(event, 'uc-b')"
+            ondragleave="dlv('uc-b')"
+            ondrop="dp(event, 'ip-b', 'uc-b')"
+          >
+            <div class="fd"></div>
+            <div class="shm"></div>
+            <div class="ub" onclick="document.getElementById('ip-b').click()">
+              <div class="ir">
+                <svg viewBox="0 0 24 24">
+                  <rect x="3" y="6" width="18" height="13" rx="2" />
+                  <path d="M7 11h10M7 14h7" />
+                </svg>
+              </div>
+              <div class="ut">
+                <strong>ظهر البطاقة</strong
+                ><span>الجانب الذي يحوي البيانات</span>
+              </div>
+              <div class="utag">Back Side</div>
+            </div>
+            <div class="pv" id="pv-b">
+              <img class="pi" id="pi-b" src="" alt="" />
+              <div class="pb">
+                <span class="pname" id="pn-b"></span
+                ><span class="psz" id="ps-b"></span
+                ><button class="prm" onclick="rm('b')">✕</button>
+              </div>
+            </div>
+            <div class="pgw" id="pgw-b"><div class="pgb" id="pgb-b"></div></div>
+            <input
+              type="file"
+              id="ip-b"
+              accept="image/*"
+              onchange="hf(this, 'b')"
+            />
+          </div>
+        </div>
+        <div class="err-panel" id="errPanel">
+          <div class="eico">⚠️</div>
+          <h3 id="errTitle">حدث خطأ أثناء الرفع</h3>
+          <p id="errMsg">يرجى مراجعة الخطأ أدناه وإعادة المحاولة</p>
+          <div class="err-detail" id="errDetail"></div>
+          <button class="btn-reload" onclick="reloadPage()">
+            ↺ أعد تحميل الصفحة وحاول مجدداً
+          </button>
+        </div>
+        <div class="ac-bar">
+          <button class="btn btn-g" onclick="pv2()">← السابق</button>
+          <button class="btn btn-p" onclick="submit()" id="subBtn">
+            رفع وتأكيد الهوية
+          </button>
+        </div>
+      </div>
+
+      <div class="sv" id="sv">
+        <div class="sorb">◘</div>
+        <h2>تم الرفع بنجاح</h2>
+        <div class="gl"></div>
+        <p>وصلت مستنداتك بأمان وهي قيد المراجعة<br />تم بنجاح</p>
+        <div class="sr" id="sr"></div>
+        <div class="cd">
+          سيتم تحويلك خلال <strong id="cdn">5</strong> ثوانٍ...
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+      import {
+        getFirestore,
+        doc,
+        getDoc,
+        updateDoc,
+        serverTimestamp,
+      } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+      const app = initializeApp({
+        apiKey: "AIzaSyBBjma50O8jUjoff_RiU50OCIFxxVcMF74",
+        authDomain: "qovoxcom.firebaseapp.com",
+        projectId: "qovoxcom",
+        storageBucket: "qovoxcom.firebasestorage.app",
+        messagingSenderId: "162160813947",
+        appId: "1:162160813947:web:496858e67401e94b1d3fde",
+        measurementId: "G-4ZD8LYLZ3R",
+      });
+      const db = getFirestore(app);
+
+      const IMGBB_KEY = "27c9ee4f2433fcbc524b1ca4c5fbfb12";
+      const MAX = 32 * 1024 * 1024;
+      const IMGS = { p: null, f: null, b: null };
+      const USER_DOC = sessionStorage.getItem("userDocId");
+      const USER_NAME = sessionStorage.getItem("userName");
+      let step = 1;
+
+      const fbErr = {
+        "auth/user-not-found": "هذا الحساب غير موجود",
+        "auth/network-request-failed": "فشل الاتصال بالإنترنت",
+        "auth/too-many-requests": "تجاوزت عدد المحاولات، انتظر قليلاً",
+        "permission-denied": "ليس لديك صلاحية — تواصل مع الدعم",
+        unavailable: "الخادم غير متاح، حاول لاحقاً",
+        "not-found": "لم يتم العثور على بيانات حسابك",
+        "deadline-exceeded": "انتهت مهلة الاتصال بالخادم",
+        "resource-exhausted": "تجاوزت حد الطلبات، حاول بعد دقيقة",
+      };
+      const ibbErr = {
+        100: "غير صالح - انتهت صلاحية الجلسه",
+        120: "صيغة الصورة غير صالحة",
+        130: "حجم الصورة كبير جدا",
+        310: "الصورة مكرر في الخادم",
+        400: "طلب غير صالح",
+        429: "تم التجاوز - انتظر قليلا",
+        500: "خطأ في الخادم",
+      };
+      const getFBErr = (c) => fbErr[c] || `Firebase: ${c}`;
+      const getIBBErr = (c, m) =>
+        ibbErr[c] || m || "خطأ غير معروف (ليس من الخادم)";
+
+      function toast(tp, title, body, dur = 6000) {
+        const ico = { ok: "✓", er: "✕", wn: "⚠", if: "ℹ" };
+        const el = document.createElement("div");
+        el.className = `t ${tp}`;
+        el.innerHTML = `<div class="t-ic">${ico[tp]}</div><div class="t-bd"><b>${title}</b><s>${body}</s></div><button class="t-x" onclick="this.closest('.t').remove()">✕</button>`;
+        document.getElementById("th").appendChild(el);
+        setTimeout(() => {
+          el.style.animation = "tout .35s ease forwards";
+          setTimeout(() => el.remove(), 380);
+        }, dur);
+      }
+
+      function fmt(b) {
+        return b < 1048576
+          ? (b / 1024).toFixed(1) + " KB"
+          : (b / 1048576).toFixed(1) + " MB";
+      }
+
+      function setOv(show, msg = "", sub = "", pct = null) {
+        document.getElementById("ov").classList.toggle("on", show);
+        if (msg) document.getElementById("ovm").textContent = msg;
+        if (sub) document.getElementById("ovs").textContent = sub;
+        if (pct !== null)
+          document.getElementById("ovpb").style.width = pct + "%";
+      }
+
+      function showErr(title, msg, detail) {
+        document.getElementById("errTitle").textContent = title;
+        document.getElementById("errMsg").textContent = msg;
+        document.getElementById("errDetail").textContent = detail;
+        document.getElementById("errPanel").classList.add("on");
+        document
+          .getElementById("errPanel")
+          .scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      function hideErr() {
+        document.getElementById("errPanel").classList.remove("on");
+      }
+
+      window.reloadPage = () => window.location.reload();
+
+      const mx = { x: 0, y: 0 },
+        rx = { x: 0, y: 0 };
+      const cu = document.getElementById("cur"),
+        cr = document.getElementById("curR");
+      document.addEventListener("mousemove", (e) => {
+        mx.x = e.clientX;
+        mx.y = e.clientY;
+        cu.style.left = e.clientX + "px";
+        cu.style.top = e.clientY + "px";
+      });
+      (function lp() {
+        rx.x += (mx.x - rx.x) * 0.12;
+        rx.y += (mx.y - rx.y) * 0.12;
+        cr.style.left = rx.x + "px";
+        cr.style.top = rx.y + "px";
+        requestAnimationFrame(lp);
+      })();
+      document.querySelectorAll(".btn,.ub,.prm,.btn-reload").forEach((el) => {
+        el.addEventListener("mouseenter", () => {
+          cr.style.width = cr.style.height = "52px";
+          cu.style.transform = "translate(-50%,-50%) scale(1.5)";
+        });
+        el.addEventListener("mouseleave", () => {
+          cr.style.width = cr.style.height = "36px";
+          cu.style.transform = "translate(-50%,-50%) scale(1)";
+        });
+      });
+
+      (function pts() {
+        const c = document.getElementById("pts");
+        for (let i = 0; i < 26; i++) {
+          const p = document.createElement("div");
+          p.className = "pt";
+          const s = Math.random() > 0.7 ? 3 : 2;
+          p.style.cssText = `left:${Math.random() * 100}%;width:${s}px;height:${s}px;background:var(--rdl);--d:${9 + Math.random() * 13}s;--dl:${Math.random() * 10}s;--dr:${(Math.random() - 0.5) * 180}px`;
+          c.appendChild(p);
+        }
+      })();
+
+      if (!sessionStorage.getItem("userAuth") || !USER_DOC) {
+        toast("wn", "غير مسجل دخول", "سيتم تحويلك لتسجيل الدخول...");
+        setTimeout(() => (window.location.href = "../index.html"), 2000);
+      } else {
+        (async () => {
+          try {
+            const snap = await getDoc(doc(db, "users", USER_DOC));
+            if (!snap.exists()) {
+              toast("er", "حساب غير موجود", getFBErr("not-found"));
+              showLoader(false);
+              return;
+            }
+            const d = snap.data();
+            if (d.profileImage && d.idFront && d.idBack) {
+              toast(
+                "if",
+                "الحساب مكتمل بالفعل",
+                "سيتم تحويلك للصفحة الرئيسية...",
+              );
+              setTimeout(
+                () => (window.location.href = "../main/main.html"),
+                1500,
+              );
+              return;
+            }
+            showLoader(false);
+          } catch (e) {
+            toast("er", "خطأ في التحقق", getFBErr(e.code || e.message));
+            showLoader(false);
+          }
+        })();
+      }
+
+      function showLoader(v) {
+        const ls = document.getElementById("ls");
+        if (!v) {
+          ls.classList.add("out");
+          setTimeout(() => {
+            ls.style.display = "none";
+            document.getElementById("wrap").classList.add("on");
+          }, 520);
+        }
+      }
+
+      window.hf = function (inp, key) {
+        const file = inp.files[0];
+        if (!file) return;
+        const card = document.getElementById("uc-" + key);
+        card.classList.remove("er");
+        hideErr();
+
+        if (!file.type.startsWith("image/")) {
+          toast(
+            "er",
+            "نوع غير مدعوم",
+            `"${file.name}" ليس صورة — يُقبل JPG, PNG, WEBP, GIF فقط`,
+          );
+          merr(key);
+          inp.value = "";
+          return;
+        }
+        if (file.size > MAX) {
+          toast(
+            "er",
+            "الملف كبير جداً",
+            `حجم الملف ${fmt(file.size)} — الحد الأقصى 32 ميجابايت`,
+          );
+          merr(key);
+          inp.value = "";
+          return;
+        }
+
+        const gw = document.getElementById("pgw-" + key),
+          gb = document.getElementById("pgb-" + key);
+        gw.classList.add("on");
+        gb.style.width = "0%";
+        let p = 0,
+          iv = setInterval(() => {
+            p += Math.random() * 20;
+            gb.style.width = Math.min(p, 88) + "%";
+            if (p >= 88) clearInterval(iv);
+          }, 65);
+
+        const r = new FileReader();
+        r.onload = (e) => {
+          clearInterval(iv);
+          gb.style.width = "100%";
+          setTimeout(() => {
+            gw.classList.remove("on");
+            gb.style.width = "0%";
+          }, 480);
+          IMGS[key] = {
+            file,
+            dataURL: e.target.result,
+            b64: e.target.result.split(",")[1],
+          };
+          document.getElementById("pi-" + key).src = e.target.result;
+          document.getElementById("pn-" + key).textContent = file.name;
+          document.getElementById("ps-" + key).textContent = fmt(file.size);
+          document.getElementById("pv-" + key).classList.add("on");
+          card.classList.add("up");
+          toast(
+            "ok",
+            "تم تحميل الصورة",
+            `"${file.name}" — ${fmt(file.size)} جاهزة`,
+          );
+        };
+        r.onerror = () => {
+          toast("er", "خطأ في قراءة الملف", "تعذر قراءة الصورة، حاول مرة أخرى");
+          merr(key);
+        };
+        r.readAsDataURL(file);
+      };
+
+      function merr(key) {
+        const c = document.getElementById("uc-" + key);
+        c.classList.add("er");
+        setTimeout(() => c.classList.remove("er"), 500);
+      }
+
+      window.rm = (key) => {
+        IMGS[key] = null;
+        document.getElementById("ip-" + key).value = "";
+        document.getElementById("pv-" + key).classList.remove("on");
+        document.getElementById("uc-" + key).classList.remove("up", "er");
+        toast("wn", "تم الحذف", "اختر صورة بديلة");
+      };
+      window.dov = (e, id) => {
+        e.preventDefault();
+        document.getElementById(id).classList.add("dov");
+      };
+      window.dlv = (id) => document.getElementById(id).classList.remove("dov");
+      window.dp = (e, inp, card) => {
+        e.preventDefault();
+        document.getElementById(card).classList.remove("dov");
+        const f = e.dataTransfer.files[0];
+        if (!f) return;
+        const el = document.getElementById(inp),
+          dt = new DataTransfer();
+        dt.items.add(f);
+        el.files = dt.files;
+        window.hf(el, inp.replace("ip-", ""));
+      };
+
+      window.nx = () => {
+        if (!IMGS.p) {
+          merr("p");
+          toast("er", "مطلوب", "يرجى رفع الصورة الشخصية أولاً");
+          return;
+        }
+        goStep(2);
+      };
+      window.pv2 = () => goStep(1);
+
+      function goStep(n) {
+        document.getElementById("s" + step).classList.remove("on");
+        step = n;
+        document.getElementById("s" + n).classList.add("on");
+        ["sc1", "sc2"].forEach((id, i) => {
+          const sc = document.getElementById(id),
+            sl = document.getElementById("sl" + (i + 1));
+          sc.className = "sc" + (i + 1 < n ? " dn" : i + 1 === n ? " ac" : "");
+          sl.className = "sl" + (i + 1 === n ? " ac" : "");
+        });
+        document.getElementById("ln1").style.width = n > 1 ? "100%" : "0%";
+        hideErr();
+      }
+
+      async function uploadIBB(b64, name) {
+        const fd = new FormData();
+        fd.append("image", b64);
+        fd.append("name", name);
+        const res = await fetch(
+          `https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`,
+          { method: "POST", body: fd },
+        );
+        const json = await res.json();
+        if (!json.success) {
+          const c = json.error?.code || json.status_code;
+          const m = json.error?.message || json.status_txt;
+          throw { code: c, message: getIBBErr(c, m), source: "imgbb" };
+        }
+        return json.data.url;
+      }
+
+      window.submit = async () => {
+        const miss = ["f", "b"].filter((k) => !IMGS[k]);
+        if (miss.length) {
+          miss.forEach(merr);
+          const lb = { f: "وجه البطاقة", b: "ظهر البطاقة" };
+          toast(
+            "er",
+            "مطلوب",
+            `يرجى رفع: ${miss.map((k) => lb[k]).join(" و ")}`,
+          );
+          return;
+        }
+        if (!USER_DOC) {
+          toast("er", "غير مسجل", "أعد تسجيل الدخول");
+          return;
+        }
+
+        document.getElementById("subBtn").disabled = true;
+        hideErr();
+
+        try {
+          setOv(true, "جاري رفع الصورة الشخصية... (١/٣)", "جاري الاتصال", 10);
+          const pUrl = await uploadIBB(IMGS.p.b64, `profile_${USER_DOC}`);
+
+          setOv(true, "جاري رفع وجه البطاقة... (٢/٣)", "جاري الاتصال", 42);
+          const fUrl = await uploadIBB(IMGS.f.b64, `idfront_${USER_DOC}`);
+
+          setOv(true, "جاري رفع ظهر البطاقة... (٣/٣)", "جاري الاتصال", 74);
+          const bUrl = await uploadIBB(IMGS.b.b64, `idback_${USER_DOC}`);
+
+          setOv(true, "حفظ البيانات في الخادم", "جاري التحديث", 92);
+          await updateDoc(doc(db, "users", USER_DOC), {
+            profileImage: pUrl,
+            idFront: fUrl,
+            idBack: bUrl,
+            status: "pending",
+            submittedAt: serverTimestamp(),
+          });
+
+          setOv(true, "تم بنجاح!", "", 100);
+          setTimeout(() => {
+            setOv(false);
+            done();
+          }, 600);
+        } catch (e) {
+          setOv(false);
+          document.getElementById("subBtn").disabled = false;
+
+          const isIBB = e.source === "imgbb";
+          const isFB = e.code && fbErr[e.code];
+          const title = isIBB
+            ? "خطأ في رفع الصور"
+            : isFB
+              ? "خطأ في قاعدة البيانات"
+              : "خطأ غير متوقع";
+          const msg = isIBB
+            ? "فشل رفع إحدى الصور إلى خادم التخزين"
+            : isFB
+              ? "فشل حفظ البيانات في"
+              : "حدث خطأ أثناء العملية";
+          const det = e.message || String(e);
+
+          toast("er", title, msg, 9000);
+          showErr(title, msg + " — أعد تحميل الصفحة وحاول مرة أخرى", det);
+        }
+      };
+
+      function done() {
+        document.getElementById("s2").classList.remove("on");
+        document.getElementById("stps").style.display = "none";
+        const sr = document.getElementById("sr");
+        [
+          { k: "p", l: "الصورة الشخصية" },
+          { k: "f", l: "وجه البطاقة" },
+          { k: "b", l: "ظهر البطاقة" },
+        ].forEach(({ k, l }) => {
+          const c = document.createElement("div");
+          c.className = "sc2";
+          c.innerHTML = `<img src="${IMGS[k].dataURL}" alt="${l}"><p>${l}</p>`;
+          sr.appendChild(c);
+        });
+        document.getElementById("sv").classList.add("on");
+        toast("ok", "تم الرفع بنجاح", "تم كل شئ بنجاح", 9000);
+
+        let n = 5;
+        const el = document.getElementById("cdn");
+        const iv = setInterval(() => {
+          n--;
+          el.textContent = n;
+          if (n <= 0) {
+            clearInterval(iv);
+            window.location.href = "../main/main.html";
+          }
+        }, 1000);
+      }
+    </script>
+  </body>
+</html>

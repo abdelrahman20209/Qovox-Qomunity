@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Killer radar — QOVOX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;700;900&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" href="hamer.png" type="image/png">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#010d07;font-family:'Cairo',sans-serif}
+canvas{display:block;position:fixed;inset:0;touch-action:none;cursor:crosshair}
+
+#back{position:fixed;top:18px;left:18px;z-index:500;display:flex;align-items:center;gap:8px;background:rgba(0,30,15,0.6);border:1px solid rgba(0,255,140,0.22);padding:8px 16px;border-radius:40px;text-decoration:none;color:rgba(255,255,255,0.45);font-family:'Cairo',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;transition:.3s;backdrop-filter:blur(8px)}
+#back:hover{background:rgba(0,80,40,0.55);border-color:rgba(0,255,140,0.55);color:#fff;box-shadow:0 0 18px rgba(0,255,140,0.25)}
+
+#hud{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:flex-start;justify-content:space-between;padding:16px 22px 0 22px;pointer-events:none}
+#hud-left{display:flex;flex-direction:column;gap:2px;padding-right:110px}
+.hud-label{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:3px;color:rgba(0,255,140,0.35)}
+.hud-val{font-family:'Oswald',sans-serif;font-size:32px;font-weight:700;color:#00ff8c;line-height:1;text-shadow:0 0 14px rgba(0,255,140,0.55)}
+.hud-val.bump{animation:bump .15s ease}
+@keyframes bump{0%,100%{transform:scale(1)}50%{transform:scale(1.32)}}
+
+#energy-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;padding-top:4px}
+#energy-label{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:3px;color:rgba(0,255,140,0.35)}
+#energy-pips{display:flex;gap:6px}
+.pip{width:28px;height:6px;border-radius:3px;background:rgba(0,255,140,0.08);border:1px solid rgba(0,255,140,0.18);transition:background .25s,box-shadow .25s}
+.pip.on{background:#00ff8c;box-shadow:0 0 10px rgba(0,255,140,0.65)}
+
+#hp-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:4px;padding-top:4px}
+#hp-label{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:3px;color:rgba(0,255,140,0.35)}
+#hp-bar{width:110px;height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;border:1px solid rgba(0,255,140,0.15)}
+#hp-fill{height:100%;width:100%;background:linear-gradient(90deg,#00ff8c,#00ffcc);border-radius:3px;transition:width .25s,background .3s}
+
+#wave-badge{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:100;font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:4px;color:rgba(0,255,140,0.38);pointer-events:none}
+
+#combo-flash{position:fixed;top:44%;left:50%;transform:translate(-50%,-50%);z-index:200;font-family:'Oswald',sans-serif;font-size:46px;font-weight:700;color:#00ff8c;text-shadow:0 0 28px #00ff8c;pointer-events:none;opacity:0;transition:opacity .12s}
+#combo-flash.show{opacity:1}
+
+#overlay{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(1,13,7,0.93);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);transition:opacity .45s,visibility .45s}
+#overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
+.o-eyebrow{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:5px;color:rgba(0,255,140,0.35);margin-bottom:14px}
+.o-title{font-family:'Oswald',sans-serif;font-size:clamp(58px,13vw,108px);font-weight:700;color:#fff;letter-spacing:3px;line-height:.88;text-align:center}
+.o-title .g{color:#00ff8c;text-shadow:0 0 40px #00ff8c,0 0 80px rgba(0,255,140,0.3)}
+.o-desc{font-size:14px;color:rgba(255,255,255,0.32);text-align:center;line-height:2;max-width:290px;margin:18px 0 0}
+.death-box{display:none;flex-direction:column;align-items:center;padding:16px 48px;border:1px solid rgba(0,255,140,0.22);border-radius:6px;background:rgba(0,40,20,0.3);margin:22px 0 28px;gap:2px}
+.death-box.show{display:flex}
+.db-label{font-family:'Oswald',sans-serif;font-size:9px;letter-spacing:4px;color:rgba(0,255,140,0.3)}
+.db-num{font-family:'Oswald',sans-serif;font-size:70px;font-weight:700;color:#00ff8c;line-height:1;text-shadow:0 0 26px #00ff8c}
+.db-sub{font-family:'Cairo',sans-serif;font-size:12px;color:rgba(255,255,255,0.22);letter-spacing:.5px}
+.btn-row{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:10px}
+.play-btn{position:relative;padding:13px 52px;border:1px solid #00ff8c;border-radius:3px;background:transparent;color:#fff;font-family:'Cairo',sans-serif;font-size:17px;font-weight:700;letter-spacing:3px;cursor:pointer;overflow:hidden;transition:box-shadow .3s,border-color .3s}
+.play-btn::before{content:'';position:absolute;inset:0;background:rgba(0,80,40,0.55);transform:scaleX(0);transform-origin:right;transition:transform .38s cubic-bezier(.4,0,.2,1);z-index:0}
+.play-btn:hover::before{transform:scaleX(1);transform-origin:left}
+.play-btn:hover{box-shadow:0 0 36px rgba(0,255,140,0.4);border-color:#00ffcc}
+.play-btn span{position:relative;z-index:1}
+.back-overlay{text-decoration:none;color:rgba(255,255,255,0.22);font-family:'Cairo',sans-serif;font-size:13px;letter-spacing:1.5px;transition:color .3s}
+.back-overlay:hover{color:rgba(0,255,140,0.7)}
+.hint{margin-top:14px;font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.13);text-align:center}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<a href="../game.html" id="back">أرجع</a>
+
+<div id="hud">
+    <div id="hud-left">
+        <span class="hud-label">SCORE</span>
+        <span class="hud-val" id="score-val">0</span>
+    </div>
+    <div id="energy-wrap">
+        <span id="energy-label">ENERGY</span>
+        <div id="energy-pips">
+            <div class="pip on" id="pip0"></div>
+            <div class="pip on" id="pip1"></div>
+            <div class="pip on" id="pip2"></div>
+        </div>
+    </div>
+    <div id="hp-wrap">
+        <span id="hp-label">CORE HP</span>
+        <div id="hp-bar"><div id="hp-fill"></div></div>
+    </div>
+</div>
+
+<div id="wave-badge">WAVE 1</div>
+<div id="combo-flash"></div>
+
+<div id="overlay">
+    <div class="o-eyebrow">QOVOX</div>
+    <div class="o-title">KILLER<br><span class="g">RADAR</span></div>
+    <div class="o-desc" id="o-desc">اضغط في أي مكان لتطلق موجة صدمة دائرية<br>تقضي على كل الأعداء اللي تعبر عليها</div>
+    <div class="death-box" id="death-box">
+        <span class="db-label">SCORE</span>
+        <span class="db-num" id="db-num">0</span>
+        <span class="db-sub" id="db-sub">اتصدت لـ 0 موجة</span>
+    </div>
+    <div class="btn-row">
+        <button class="play-btn" id="play-btn"><span id="btn-label">ابدأ الدفاع</span></button>
+        <a href="../game.html" class="back-overlay">أرجع</a>
+    </div>
+    <div class="hint">كليك أو تاتش = موجة صدمة</div>
+</div>
+
+<script>
+const canvas    = document.getElementById('c');
+const ctx       = canvas.getContext('2d');
+const scoreEl   = document.getElementById('score-val');
+const hpFillEl  = document.getElementById('hp-fill');
+const waveBadge = document.getElementById('wave-badge');
+const overlay   = document.getElementById('overlay');
+const playBtn   = document.getElementById('play-btn');
+const deathBox  = document.getElementById('death-box');
+const dbNum     = document.getElementById('db-num');
+const dbSub     = document.getElementById('db-sub');
+const oDescEl   = document.getElementById('o-desc');
+const btnLabel  = document.getElementById('btn-label');
+const comboEl   = document.getElementById('combo-flash');
+const pips      = [
+    document.getElementById('pip0'),
+    document.getElementById('pip1'),
+    document.getElementById('pip2')
+];
+
+let W, H, CX, CY, rafId;
+let enemies, pulses, parts, rings;
+let score, hp, wave, energy, kills;
+let lastSpawn, spawnTimer, waveTimer;
+let gameActive  = false;
+let bgPhase     = 0;
+let hbLine      = [];
+let hbTick      = 0;
+let comboTimer  = null;
+const MAX_E     = 3;
+const E_REGEN   = 1800;
+let regenTimers = [];
+
+function resize() {
+    W  = canvas.width  = window.innerWidth;
+    H  = canvas.height = window.innerHeight;
+    CX = W / 2;
+    CY = H / 2;
+}
+window.addEventListener('resize', resize);
+
+canvas.addEventListener('click',      () => { if (gameActive) firePulse(); });
+canvas.addEventListener('touchstart', e  => { e.preventDefault(); if (gameActive) firePulse(); }, { passive: false });
+
+function firePulse() {
+    if (energy <= 0) return;
+    energy--;
+    updatePips();
+    pulses.push(new Pulse());
+    const t = setTimeout(() => {
+        if (energy < MAX_E) { energy++; updatePips(); }
+    }, E_REGEN);
+    regenTimers.push(t);
+}
+
+function updatePips() {
+    for (let i = 0; i < MAX_E; i++) pips[i].classList.toggle('on', i < energy);
+}
+
+function updateHP(val) {
+    hp = Math.max(0, Math.min(100, val));
+    hpFillEl.style.width      = hp + '%';
+    hpFillEl.style.background = hp > 55
+        ? 'linear-gradient(90deg,#00ff8c,#00ffcc)'
+        : hp > 25
+        ? 'linear-gradient(90deg,#ffdd00,#ffaa00)'
+        : 'linear-gradient(90deg,#ff3300,#ff7700)';
+}
+
+function showCombo(txt) {
+    comboEl.textContent = txt;
+    comboEl.classList.add('show');
+    if (comboTimer) clearTimeout(comboTimer);
+    comboTimer = setTimeout(() => comboEl.classList.remove('show'), 650);
+}
+
+class Pulse {
+    constructor() {
+        this.r     = 26;
+        this.maxR  = Math.max(W, H) * 0.9;
+        this.speed = 10 + wave * 0.5;
+        this.thick = 18 + wave * 1.2;
+        this.alpha = 1;
+        this.hits  = new Set();
+    }
+    update() {
+        this.r    += this.speed;
+        this.alpha = Math.max(0, 1 - this.r / this.maxR);
+    }
+    draw() {
+        if (this.alpha <= 0) return;
+        const hw = this.thick * 0.5;
+        const r1 = Math.max(0.1, this.r - hw);
+        const r2 = this.r + hw;
+        ctx.save();
+        const g = ctx.createRadialGradient(CX, CY, r1, CX, CY, r2);
+        g.addColorStop(0,    `rgba(0,255,140,0)`);
+        g.addColorStop(0.3,  `rgba(0,255,140,${this.alpha * 0.55})`);
+        g.addColorStop(0.5,  `rgba(180,255,220,${this.alpha * 0.95})`);
+        g.addColorStop(0.7,  `rgba(0,255,140,${this.alpha * 0.55})`);
+        g.addColorStop(1,    `rgba(0,255,140,0)`);
+        ctx.strokeStyle = g;
+        ctx.lineWidth   = this.thick;
+        ctx.shadowColor = '#00ff8c';
+        ctx.shadowBlur  = 24 * this.alpha;
+        ctx.beginPath();
+        ctx.arc(CX, CY, this.r, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+    }
+    dead() { return this.r > this.maxR; }
+    hitsEnemy(e) {
+        const d  = Math.hypot(e.x - CX, e.y - CY);
+        const hw = this.thick * 0.5 + 14;
+        return d >= this.r - hw && d <= this.r + hw && !this.hits.has(e);
+    }
+}
+
+const ETYPES = [
+    { r: 7,  spd: 2.5,  hp: 1, pts: 10, color: [255, 60,  60]  },
+    { r: 11, spd: 1.5,  hp: 2, pts: 20, color: [255, 140, 0]   },
+    { r: 17, spd: 0.85, hp: 4, pts: 50, color: [180, 0,   255] },
+];
+
+class Enemy {
+    constructor(waveNum) {
+        const ti   = waveNum <= 2 ? 0 : waveNum <= 5 ? (Math.random() < 0.7 ? 0 : 1) : Math.floor(Math.random() * ETYPES.length);
+        const t    = ETYPES[Math.min(ti, ETYPES.length - 1)];
+        this.r     = t.r;
+        this.maxHp = t.hp + Math.floor(waveNum * 0.18);
+        this.hp    = this.maxHp;
+        this.spd   = t.spd + waveNum * 0.06;
+        this.pts   = t.pts;
+        this.cr    = t.color;
+        this.flash = 0;
+        this.phase = Math.random() * Math.PI * 2;
+        const ang  = Math.random() * Math.PI * 2;
+        const dist = Math.max(W, H) * 0.62;
+        this.x     = CX + Math.cos(ang) * dist;
+        this.y     = CY + Math.sin(ang) * dist;
+        this.wph   = Math.random() * Math.PI * 2;
+        this.wob   = (Math.random() - 0.5) * 0.04;
+    }
+
+    update() {
+        const dx   = CX - this.x;
+        const dy   = CY - this.y;
+        const dist = Math.hypot(dx, dy) || 1;
+        this.wph  += 0.05;
+        const perp = Math.sin(this.wph) * this.wob;
+        this.x    += (dx / dist) * this.spd + (-dy / dist) * perp * dist;
+        this.y    += (dy / dist) * this.spd + ( dx / dist) * perp * dist;
+        if (this.flash > 0) this.flash = Math.max(0, this.flash - 0.1);
+        this.phase += 0.07;
+    }
+
+    draw() {
+        const pulse = 0.86 + Math.sin(this.phase) * 0.14;
+        const cr    = this.r * pulse;
+        const [R, G, B] = this.flash > 0.4 ? [255, 255, 200] : this.cr;
+
+        ctx.save();
+        ctx.translate(this.x, this.y);
+
+        if (this.flash > 0) {
+            ctx.shadowColor = '#ffffff';
+            ctx.shadowBlur  = 20 * this.flash;
+        }
+
+        const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, cr * 2.5);
+        glow.addColorStop(0,   `rgba(${R},${G},${B},0.35)`);
+        glow.addColorStop(0.5, `rgba(${R},${G},${B},0.12)`);
+        glow.addColorStop(1,   `rgba(${R},${G},${B},0)`);
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(0, 0, cr * 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = `rgb(${R},${G},${B})`;
+        ctx.beginPath();
+        ctx.arc(0, 0, cr, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = `rgba(255,255,255,0.55)`;
+        ctx.beginPath();
+        ctx.arc(-cr * 0.28, -cr * 0.28, cr * 0.28, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+
+        if (this.maxHp > 1) {
+            const bw  = this.r * 3.2;
+            const bx  = this.x - bw / 2;
+            const by  = this.y - this.r - 9;
+            const pct = this.hp / this.maxHp;
+            ctx.save();
+            ctx.fillStyle = 'rgba(255,255,255,0.07)';
+            ctx.beginPath();
+            ctx.rect(bx, by, bw, 4);
+            ctx.fill();
+            ctx.fillStyle = pct > 0.5 ? '#00ff8c' : pct > 0.25 ? '#ffdd00' : '#ff3300';
+            ctx.beginPath();
+            ctx.rect(bx, by, Math.max(0, bw * pct), 4);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    hit() {
+        this.hp--;
+        this.flash = 1;
+        return this.hp <= 0;
+    }
+
+    atCenter() { return Math.hypot(this.x - CX, this.y - CY) < 38; }
+}
+
+class Particle {
+    constructor(x, y, r, g, b) {
+        const ang  = Math.random() * Math.PI * 2;
+        const spd  = 1.5 + Math.random() * 7;
+        this.x     = x;
+        this.y     = y;
+        this.vx    = Math.cos(ang) * spd;
+        this.vy    = Math.sin(ang) * spd;
+        this.rad   = 1.5 + Math.random() * 4;
+        this.r     = r; this.g = g; this.b = b;
+        this.life  = 1;
+        this.decay = 0.014 + Math.random() * 0.022;
+    }
+    update() {
+        this.x    += this.vx;
+        this.y    += this.vy;
+        this.vx   *= 0.94;
+        this.vy   *= 0.94;
+        this.life -= this.decay;
+    }
+    draw() {
+        if (this.life <= 0) return;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.life);
+        ctx.fillStyle   = `rgb(${this.r},${this.g},${this.b})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, Math.max(0.4, this.rad * this.life), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+    dead() { return this.life <= 0; }
+}
+
+class Ring {
+    constructor(x, y, r, g, b) {
+        this.x = x; this.y = y;
+        this.rad  = 8; this.life = 1;
+        this.r = r; this.g = g; this.b = b;
+    }
+    update() { this.rad += 3.5; this.life -= 0.065; }
+    draw() {
+        if (this.life <= 0) return;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.life * 0.65);
+        ctx.strokeStyle = `rgb(${this.r},${this.g},${this.b})`;
+        ctx.lineWidth   = 2;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.rad, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+    }
+    dead() { return this.life <= 0; }
+}
+
+function explode(x, y, cr) {
+    const [R, G, B] = cr;
+    for (let i = 0; i < 40; i++) parts.push(new Particle(x, y, R, G, B));
+    parts.push(new Particle(x, y, 255, 255, 255));
+    rings.push(new Ring(x, y, R, G, B));
+}
+
+function initHB() {
+    hbLine = [];
+    for (let i = 0; i <= 200; i++) hbLine.push(0.5);
+}
+
+function drawBg() {
+    ctx.save();
+    ctx.fillStyle = '#010d07';
+    ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+
+    bgPhase += 0.008;
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(0,255,140,0.05)';
+    ctx.lineWidth   = 1;
+    const gs = 55;
+    for (let x = CX % gs; x < W; x += gs) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (let y = CY % gs; y < H; y += gs) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    ctx.restore();
+
+    for (let i = 0; i < 3; i++) {
+        const rad = 110 + i * 90 + Math.sin(bgPhase + i) * 18;
+        ctx.save();
+        ctx.strokeStyle = `rgba(0,255,140,${0.04 - i * 0.01})`;
+        ctx.lineWidth   = 1;
+        ctx.beginPath();
+        ctx.arc(CX, CY, rad, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    hbTick++;
+    for (let i = hbLine.length - 1; i > 0; i--) hbLine[i] = hbLine[i - 1];
+    let v = 0.5;
+    const bt = hbTick % 62;
+    if (bt < 9) v = 0.5 + Math.sin((bt / 9) * Math.PI) * (0.13 + Math.random() * 0.05) * (bt < 4 ? 1 : -0.65);
+    hbLine[0] = v;
+
+    const hbH  = 28;
+    const hbY  = H - 34;
+    const hbX0 = CX - W * 0.38;
+    const hbW  = W * 0.76;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(0,255,140,0.25)';
+    ctx.lineWidth   = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i < hbLine.length; i++) {
+        const px = hbX0 + (i / (hbLine.length - 1)) * hbW;
+        const py = hbY  + (hbLine[i] - 0.5) * hbH;
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+    ctx.restore();
+}
+
+function drawCore() {
+    const pulse = 0.9 + Math.sin(bgPhase * 4) * 0.1;
+    const cr    = 22 * pulse;
+
+    ctx.save();
+    const g = ctx.createRadialGradient(CX, CY, 0, CX, CY, cr * 4);
+    g.addColorStop(0,   'rgba(0,255,140,0.2)');
+    g.addColorStop(0.5, 'rgba(0,255,140,0.05)');
+    g.addColorStop(1,   'transparent');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(CX, CY, cr * 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.shadowColor = '#00ff8c';
+    ctx.shadowBlur  = 30;
+    ctx.fillStyle   = '#00ff8c';
+    ctx.beginPath();
+    ctx.arc(CX, CY, cr, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(220,255,240,0.85)';
+    ctx.beginPath();
+    ctx.arc(CX - cr * 0.24, CY - cr * 0.24, cr * 0.28, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+}
+
+function loop(ts) {
+    rafId = requestAnimationFrame(loop);
+    drawBg();
+
+    if (ts - lastSpawn > spawnTimer) {
+        lastSpawn  = ts;
+        const n    = 1 + Math.floor(wave * 0.5 + Math.random() * 1.5);
+        for (let i = 0; i < n; i++) enemies.push(new Enemy(wave));
+        spawnTimer = Math.max(400, 1600 - wave * 70);
+    }
+
+    waveTimer++;
+    const wLen = Math.max(5, 13 - wave * 0.4);
+    if (waveTimer > 60 * wLen) {
+        wave++;
+        waveTimer = 0;
+        waveBadge.textContent = 'WAVE ' + wave;
+    }
+
+    for (let i = pulses.length - 1; i >= 0; i--) {
+        const p = pulses[i];
+        p.update();
+        p.draw();
+        let hitCount = 0;
+        for (let j = enemies.length - 1; j >= 0; j--) {
+            if (p.hitsEnemy(enemies[j])) {
+                p.hits.add(enemies[j]);
+                const killed = enemies[j].hit();
+                if (killed) {
+                    explode(enemies[j].x, enemies[j].y, enemies[j].cr);
+                    score += enemies[j].pts * wave;
+                    kills++;
+                    scoreEl.textContent = score;
+                    scoreEl.classList.remove('bump');
+                    void scoreEl.offsetWidth;
+                    scoreEl.classList.add('bump');
+                    enemies.splice(j, 1);
+                    hitCount++;
+                }
+            }
+        }
+        if (hitCount >= 3) showCombo('x' + hitCount + ' COMBO!');
+        if (p.dead()) { pulses.splice(i, 1); }
+    }
+
+    for (let i = enemies.length - 1; i >= 0; i--) {
+        enemies[i].update();
+        enemies[i].draw();
+        if (enemies[i].atCenter()) {
+            explode(enemies[i].x, enemies[i].y, enemies[i].cr);
+            enemies.splice(i, 1);
+            updateHP(hp - 22);
+            if (hp <= 0) { endGame(); return; }
+        }
+    }
+
+    for (let i = parts.length - 1; i >= 0; i--) {
+        parts[i].update();
+        parts[i].draw();
+        if (parts[i].dead()) parts.splice(i, 1);
+    }
+
+    for (let i = rings.length - 1; i >= 0; i--) {
+        rings[i].update();
+        rings[i].draw();
+        if (rings[i].dead()) rings.splice(i, 1);
+    }
+
+    drawCore();
+}
+
+function endGame() {
+    cancelAnimationFrame(rafId);
+    regenTimers.forEach(clearTimeout);
+    regenTimers = [];
+    gameActive  = false;
+    deathBox.classList.add('show');
+    dbNum.textContent = score;
+    dbSub.textContent = 'وصلت لـ Wave ' + wave + ' — قتلت ' + kills + ' عدو';
+    oDescEl.textContent = score >= 5000 ? 'انت شغال معا الجيش؟' : score >= 2000 ? 'أداء قوي، كمل' : 'النواة انكسرت، حاول تاني';
+    btnLabel.textContent = 'العب تاني';
+    setTimeout(() => overlay.classList.remove('hidden'), 350);
+}
+
+function startGame() {
+    cancelAnimationFrame(rafId);
+    regenTimers.forEach(clearTimeout);
+    regenTimers = [];
+    enemies     = [];
+    pulses      = [];
+    parts       = [];
+    rings       = [];
+    score       = 0;
+    kills       = 0;
+    wave        = 1;
+    hp          = 100;
+    energy      = MAX_E;
+    lastSpawn   = -9999;
+    spawnTimer  = 900;
+    waveTimer   = 0;
+    bgPhase     = 0;
+    hbTick      = 0;
+    scoreEl.textContent   = '0';
+    waveBadge.textContent = 'WAVE 1';
+    updateHP(100);
+    updatePips();
+    initHB();
+    deathBox.classList.remove('show');
+    gameActive = true;
+    overlay.classList.add('hidden');
+    rafId = requestAnimationFrame(loop);
+}
+
+playBtn.addEventListener('click',    startGame);
+playBtn.addEventListener('touchend', e => { e.preventDefault(); startGame(); });
+
+resize();
+initHB();
+drawBg();
+drawCore();
+</script>
+</body>
+</html>

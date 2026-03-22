@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QOVOX COM</title>
+    <meta name="description" content="هذا الموقع خاص بطاقم العمل فقط و لا يمكنك ان تكون هنا اله بـ كود دعوة">
+    <link rel="stylesheet" href="one.css">
+    <link rel="icon" href="img/hamer.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Akronim&family=Alkalami&family=Amiri+Quran&family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Architects+Daughter&family=Aref+Ruqaa+Ink:wght@400;700&family=Aref+Ruqaa:wght@400;700&family=Badeen+Display&family=Baskervville:ital,wght@0,400..700;1,400..700&family=Bodoni+Moda+SC:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Bytesized&family=Cairo+Play:wght@200..1000&family=Cairo:wght@200..1000&family=Cascadia+Mono:ital,wght@0,200..700;1,200..700&family=Changa:wght@200..800&family=Coral+Pixels&family=Corinthia:wght@400;700&family=Creepster&family=Danfo&family=Edu+AU+VIC+WA+NT+Dots:wght@400..700&family=Fascinate+Inline&family=Fruktur:ital@0;1&family=Fustat:wght@200..800&family=Handjet:wght,ELSH@100..900,2&family=Jersey+25+Charted&family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Kavivanar&family=LINE+Seed+JP&family=Lalezar&family=Lateef:wght@200;300;400;500;600;700;800&family=Libertinus+Keyboard&family=Libre+Barcode+39+Extended&family=Mada:wght@200..900&family=Marhey:wght@300..700&family=Mirza:wght@400;500;600;700&family=Moirai+One&family=Nabla&family=Noto+Serif+Khitan+Small+Script&family=Oi&family=Oswald:wght@200..700&family=Palette+Mosaic&family=Playwrite+CU+Guides&family=Playwrite+NZ+Basic+Guides&family=Playwrite+NZ+Basic:wght@100..400&family=Qahiri&family=Rakkas&family=Reem+Kufi+Fun:wght@400..700&family=Reem+Kufi+Ink&family=Reem+Kufi:wght@400..700&family=Roboto:ital,wght@0,100..900;1,100..900&family=Rubik+80s+Fade&family=Rubik+Broken+Fax&family=Rubik+Moonrocks&family=Rubik+Wet+Paint&family=Rubik:ital,wght@0,300..900;1,300..900&family=Ruge+Boogie&family=Ruwudu:wght@400;500;600;700&family=SN+Pro:ital,wght@0,200..900;1,200..900&family=Scheherazade+New:wght@400;500;600;700&family=Stalinist+One&family=Tajawal:wght@200;300;400;500;700;800;900&family=Trade+Winds&family=Train+One&family=Vibes&family=Zilla+Slab+Highlight:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="background"></div>
+
+<div id="authContainer">
+    <div id="authContainer">
+        <div id="authCard">
+            <div id="authTabs">
+    <button id="loginTab" class="active">Login</button>
+    <button id="signupTab">Sign Up</button>
+            </div>
+    <form id="loginForm">
+    <input id="loginname" type="text" placeholder="Name" required>
+
+    <input id="loginPassword" type="password" placeholder="Password" required>
+
+        <button id="loginButton" type="submit">Login</button>
+    </form>
+        <form id="signupForm">
+    <input id="signupname" type="text" placeholder="name" required>
+        <div class="error" id="nameError"></div>
+    <input id="age" type="number" placeholder="age" required>
+        <div class="error" id="ageError"></div>
+    <input id="signupPassword" type="password" placeholder="Password" required>
+    <div class="error" id="passwordError"></div>
+    <input id="signupConfirmPassword" type="password" placeholder="Confirm Password" required>
+    <div class="error" id="confirmPasswordError"></div>
+    <input id="code" type="text" placeholder="acceptance code" required>
+        <button id="signupButton" type="submit">Create Account</button>
+    </form>
+    <div id="heroText">
+<span id="changingText"></span>
+</div>
+    <div id="authMessage"></div>
+</div>
+</div>
+<footer class="main-footer">
+    <div >هذا الوقع خاص بفريق Qovox لا يمكن ان اكون هنا الا بكود دعوة</p></div>
+</footer>
+
+
+
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="one.js"></script>
+</body>
+</html>
